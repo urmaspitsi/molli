@@ -6,7 +6,7 @@ from ase import Atoms
 
 import constants as C
 from dataset import Dataset
-import utils as UT
+import utils as ut
 import xyz_parser
 
 
@@ -82,4 +82,4 @@ def create_ase_atom_objects_from_dataset(dataset: Dataset) -> List[Atoms]:
                                                           )
     res.append(mols_from_file)
 
-  return UT.flatten_list(res)
+  return ut.flatten_list(res)
