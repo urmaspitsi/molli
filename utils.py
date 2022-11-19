@@ -5,11 +5,27 @@ import json
 import numpy as np
 import os
 from pathlib import Path
+import shutil
 from typing import Any, Dict, List, Tuple, Union
 
 ################################################################
 # Generic functions
 ################################################################
+
+def copy_files(
+                source_folder: Union[str, Path],
+                target_folder: Union[str, Path],
+                file_extension: str
+              ) -> None:
+
+  files_to_copy = get_file_paths_in_dir(
+                                        search_dir=Path(source_folder),
+                                        file_extension=file_extension
+                                        )
+
+  for f in files_to_copy:
+    shutil.copyfile(f, Path(target_folder).joinpath(f.name))
+
 
 def convert_list_of_tuples_to_tuple_of_lists(list_of_tuples: List[Tuple]) -> Tuple[List]:
   return list(zip(*list_of_tuples))
