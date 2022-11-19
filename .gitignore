@@ -1,1 +1,3 @@
 *.pyc
+playground/*.*
+ase_tester.py
