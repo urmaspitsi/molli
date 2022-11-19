@@ -14,10 +14,10 @@ import utils as ut
 # Create Gaussian job files: convert from .xyz trajectory (opt steps) file.
 ############################################################################
 
-#xyz_steps_file = Path("C:/tmp/gaussian/crest_mol24_ex15_PB86_STO3G/mol24_ex15_gfnff_crest_conformers.xyz")
+#xyz_steps_file = Path("C:/tmp/gaussian/crest_mol24_ex15_BP86_STO3G/mol24_ex15_gfnff_crest_conformers.xyz")
 # mol24_ex15_gfnff_crest_conformers
 
-#xyz_steps_file = Path("C:/tmp/gaussian/crest_mol24_ex15_PB86_STO3G/mol24_ex16_gfn2_crest_conformers.xyz")
+#xyz_steps_file = Path("C:/tmp/gaussian/crest_mol24_ex15_BP86_STO3G/mol24_ex16_gfn2_crest_conformers.xyz")
 # mol24_ex16_gfn2_crest_conformers
 
 #xyz_steps_file = Path("C:/tmp/gaussian/input/mol24_ex16_gfn2_crest_conformers.xyz") # mol24_ex16_gfn2_crest_conformers
@@ -49,8 +49,8 @@ gaussian_job_files = GU.create_gaussian_job_files_from_xyz_steps(
 ############################################################################
 
 log_files_dirs = [
-    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex15_PB86_STO3G_results"),
-    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex15_PB86_Def2SVPP_SVPFit_results"),
+    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex15_BP86_STO3G_results"),
+    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex15_BP86_Def2SVPP_SVPFit_results"),
   ]
 
 gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
@@ -72,10 +72,10 @@ GU.process_many_log_files(
 dir_names = [
     "mol5_B3P86_Def2SVPP_opt_24cpu",
     "mol5_PBE1PBE_SVP_SVPFit_opt_48cpu",
-    "mol5_PB86_Def2SVPP_SVPFit_opt_24cpu",
-    "mol24_PB86_STO3G_opt_48cpu",
-    "mol24_PB86_STO3G_opt_fixOTi",
-    "mol24_ex8_gfn2_crest_best_PB86_STO3G_opt",
+    "mol5_BP86_Def2SVPP_SVPFit_opt_24cpu",
+    "mol24_BP86_STO3G_opt_48cpu",
+    "mol24_BP86_STO3G_opt_fixOTi",
+    "mol24_ex8_gfn2_crest_best_BP86_STO3G_opt",
     "mol24_ex8_gfn2_crest_best_PBE1PBE_STO3G_opt",
     "mol24_PBE1PBE_STO3G_opt",
   ]
