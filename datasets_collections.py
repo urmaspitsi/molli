@@ -4,6 +4,19 @@ from typing import Any, Dict, List, Tuple, Union
 from dataset import Dataset
 
 #-----------------------------------------------------------------------------
+# mol24 final: Original input (Öeren 2011)
+#-----------------------------------------------------------------------------
+
+mol24_final = Dataset.create_with_names(
+  description="mol24_final original input from Öeren 2011",
+  paths_with_names=
+      [
+        (Path("C:/tmp/Molli/data/mol24_final.xyz"), "mol24_final"),
+      ]
+)
+
+
+#-----------------------------------------------------------------------------
 # mol24 CREST conformers
 #-----------------------------------------------------------------------------
 
@@ -11,7 +24,6 @@ mol24_crest_conformers = Dataset.create_with_names(
   description="mol24_crest_conformers",
   paths_with_names=
       [
-        (Path("C:/tmp/Molli/data/mol24_final.xyz"), "mol24_final"),
         (Path("C:/tmp/Molli/data/mol24_ex5_gfnff_crest_conformers.xyz"), "mol24_ex5_gfnff_crest_conformers"),
         (Path("C:/tmp/Molli/data/mol24_ex8_gfn2_crest_conformers.xyz"), "mol24_ex8_gfn2_crest_conformers"),
         (Path("C:/tmp/Molli/data/mol24_ex10_gfnff_crest_conformers.xyz"), "mol24_ex10_gfnff_crest_conformers"),
