@@ -31,3 +31,23 @@ from ase.constraints import FixInternals
 #   visualize: graph, charts, histograms
 
 
+
+# Tasks:
+# 1. optimization steps: input 1 xyz file, contains many xyz-blocks (geometries)
+#   Q: questions to ask? timeseries of a bond length(s), angle(s).
+#    How do these evolve through optimization process?
+#   R: report: timeseries plots, overlay plots for angles(?)
+#
+# 2. Conformers ensembles: input 1 or more xyz files, contain many xyz blocks.
+#     each block is independent of the others.
+#   Q: questions to ask? filter/group by specific or aggregate features. bonds, angles, etc.
+#   R: report: histogram, 
+#
+#
+# Create template datasets: 
+#   opt-steps: xtb, gaussian, turbomole: compare various model chemistries
+#   conformers: crest, crest-reoptimized
+#
+#
+#
+
