@@ -82,6 +82,7 @@ def read_xyz_file(
   lines = ut.read_text_file_as_lines(file_path=input_path)
   num_lines = len(lines)
   start_line = 0
+  idx = 0
   while start_line < num_lines:
     first_line = lines[start_line].strip()
     # first line must be numeric: number of atoms
@@ -101,10 +102,13 @@ def read_xyz_file(
             "description": description,
             "xyz_lines": xyz_lines,
             "start_line": start_line,
+            "idx": idx,
             }
         )
 
       start_line = end_line
+      idx +=1
+
     else: # empty or non-numeric line
       start_line += 1
 
