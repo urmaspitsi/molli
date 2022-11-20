@@ -84,3 +84,15 @@ def create_ase_atom_objects_from_dataset(dataset: Dataset) -> List[Atoms]:
     res.append(mols_from_file)
 
   return ut.flatten_list(res)
+
+
+def compare_if_molecules_are_equal(mol1: Atoms, mol2: Atoms) -> bool:
+  return len(mol1.numbers) == len(mol2.numbers) \
+        and (mol1.numbers == mol2.numbers).all() \
+        and np.allclose(
+              mol1.get_all_distances(),
+              mol2.get_all_distances(),
+              rtol=1e-05,
+              atol=1e-08,
+              equal_nan=True
+            )
