@@ -26,8 +26,8 @@ class Distance(Feature):
 
   def get_info(self, atoms_obj: Atoms) -> str:
     symbols = atoms_obj.get_chemical_symbols()
-    n1 = f"{symbols[self.atom_idx1]}({self.atom_idx1})"
-    n2 = f"{symbols[self.atom_idx2]}({self.atom_idx2})"
+    n1 = f"{symbols[self.atom_idx1]}({self.atom_idx1 + 1})"
+    n2 = f"{symbols[self.atom_idx2]}({self.atom_idx2 + 1})"
     return f"Distance between atoms {n1}-{n2}"
 
 
@@ -42,9 +42,9 @@ class Angle(Feature):
 
   def get_info(self, atoms_obj: Atoms) -> str:
     symbols = atoms_obj.get_chemical_symbols()
-    n1 = f"{symbols[self.atom_idx1]}({self.atom_idx1})"
-    n2 = f"{symbols[self.atom_idx2]}({self.atom_idx2})"
-    n3 = f"{symbols[self.atom_idx3]}({self.atom_idx3})"
+    n1 = f"{symbols[self.atom_idx1]}({self.atom_idx1 + 1})"
+    n2 = f"{symbols[self.atom_idx2]}({self.atom_idx2 + 1})"
+    n3 = f"{symbols[self.atom_idx3]}({self.atom_idx3 + 1})"
     return f"Bending angle between atoms {n1}-{n2}-{n3}"
 
 
@@ -60,10 +60,10 @@ class Dihedral(Feature):
 
   def get_info(self, atoms_obj: Atoms) -> str:
     symbols = atoms_obj.get_chemical_symbols()
-    n1 = f"{symbols[self.atom_idx1]}({self.atom_idx1})"
-    n2 = f"{symbols[self.atom_idx2]}({self.atom_idx2})"
-    n3 = f"{symbols[self.atom_idx3]}({self.atom_idx3})"
-    n4 = f"{symbols[self.atom_idx4]}({self.atom_idx4})"
+    n1 = f"{symbols[self.atom_idx1]}({self.atom_idx1 + 1})"
+    n2 = f"{symbols[self.atom_idx2]}({self.atom_idx2 + 1})"
+    n3 = f"{symbols[self.atom_idx3]}({self.atom_idx3 + 1})"
+    n4 = f"{symbols[self.atom_idx4]}({self.atom_idx4 + 1})"
     return f"Torsion angle between atoms {n1}-{n2}-{n3}-{n4}"
 
 
