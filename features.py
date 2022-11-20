@@ -17,7 +17,7 @@ class Feature():
 
 
 @dataclass
-class Bond(Feature):
+class Distance(Feature):
   atom_idx1: int
   atom_idx2: int
 

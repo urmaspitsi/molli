@@ -2,10 +2,10 @@ import features as FT
 
 
 mol24_forbidden_bonds = [
-  FT.Bond(label="7-2", atom_idx1=7, atom_idx2=2),
-  FT.Bond(label="7-12", atom_idx1=7, atom_idx2=12),
-  FT.Bond(label="61-45", atom_idx1=61, atom_idx2=45),
-  FT.Bond(label="61-65", atom_idx1=61, atom_idx2=65),
+  FT.Distance(label="7-2", atom_idx1=7, atom_idx2=2),
+  FT.Distance(label="7-12", atom_idx1=7, atom_idx2=12),
+  FT.Distance(label="61-45", atom_idx1=61, atom_idx2=45),
+  FT.Distance(label="61-65", atom_idx1=61, atom_idx2=65),
 ]
 
 mol24_constraints6_angles = [
