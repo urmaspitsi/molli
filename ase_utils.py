@@ -46,41 +46,66 @@ def create_ase_atoms_from_xyz_data(xyz_data: Dict) -> Atoms:
                   else xyz_parser.split_xyz_lines_elements_coords_from_tuple(xyz_data["xyz_lines"])
 
   atomic_nrs = [C.get_atomic_number(i) for i in elem_coords["elements"]]
-
   info = {}
   info_keys = ["name", "description"]
+
   for k in info_keys:
     if k in xyz_data:
       info[k] = xyz_data[k]
 
-
   return create_ase_atoms(
-                              atomic_nrs=atomic_nrs,
-                              coords=elem_coords["coords"],
-                              info=info
-                            )
+                          atomic_nrs=atomic_nrs,
+                          coords=elem_coords["coords"],
+                          info=info
+                        )
 
 
-def create_ase_atoms_list_from_xyz_file(input_path: Path, name: str) -> List[Atoms]:
-  add_info = {
-    "name": name,
-    }
+def create_ase_atoms_list_from_xyz_file(
+                                          input_path: Path,
+                                          name: str
+                                        ) -> List[Atoms]:
+  # add_info = {
+  #   "name": name,
+  #   }
 
-  res = [create_ase_atoms_from_xyz_data({**x, **add_info}) for x in xyz_parser.read_xyz_file(
-                                                              input_path=input_path,
-                                                              convert_coords_to_float=True
-                                                            )
+  parsed_xyz_data = [x for x in xyz_parser.read_xyz_file(
+                                              input_path=input_path,
+                                              convert_coords_to_float=True
+                                            )
         ]
+  add_item_nr_to_name = True if len(parsed_xyz_data) > 1 else False
+
+  # multiple xyz blocks in the file: trajectory, optimization steps, conformers etc.
+  # append idx+1 numeric value to the name: idx=0, "name" -> "name_1"
+  # idx is zero based, added number will be 1-based.
+  for xyz in parsed_xyz_data:
+    if add_item_nr_to_name and "idx" in xyz:
+      item_nr = xyz["idx"] + 1
+      xyz["name"] = f"{name}_{item_nr}"
+    else:
+      # single xyz geometry or no idx information
+      xyz["name"] = name
+
+    # xyz = {**xyz, **add_info}
+
+  res = [create_ase_atoms_from_xyz_data(x) for x in parsed_xyz_data]
+
+  # res = [create_ase_atoms_from_xyz_data({**x, **add_info}) for x in xyz_parser.read_xyz_file(
+  #                                                             input_path=input_path,
+  #                                                             convert_coords_to_float=True
+  #                                                           )
+  #       ]
   return res
 
 
 def create_ase_atoms_list_from_dataset(dataset: Dataset) -> List[Atoms]:
+
   res = []
   for i in range(len(dataset)):
     mols_from_file = create_ase_atoms_list_from_xyz_file(
-                                                            input_path=dataset[i],
-                                                            name=dataset.names[i]
-                                                          )
+                                                          input_path=dataset[i],
+                                                          name=dataset.names[i]
+                                                        )
     res.append(mols_from_file)
 
   return ut.flatten_list(res)
