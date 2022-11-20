@@ -16,11 +16,12 @@ def create_ase_atoms_obj(
                           info: Dict,
                         ) -> Atoms:
 
+  # TODO: initial atoms with cell definition and pbc: https://wiki.fysik.dtu.dk/ase/ase/atoms.html
   atoms_dict = {
       "numbers": atomic_nrs,
       "positions": coords,
-      "cell": np.zeros((3, 3), dtype=float),
-      "pbc": np.zeros((3,), dtype=float),
+      "cell": np.zeros((3, 3), dtype=float), # .fill(1.0)
+      "pbc": np.zeros((3,), dtype=float),    # .fill(1)
     }
 
   res = Atoms.fromdict(atoms_dict)
