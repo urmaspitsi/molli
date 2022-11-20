@@ -10,11 +10,11 @@ import utils as ut
 import xyz_parser
 
 
-def create_ase_atoms_obj(
-                          atomic_nrs: List[int],
-                          coords: List[List[float]],
-                          info: Dict,
-                        ) -> Atoms:
+def create_ase_atoms(
+                      atomic_nrs: List[int],
+                      coords: List[List[float]],
+                      info: Dict,
+                    ) -> Atoms:
 
   # TODO: initial atoms with cell definition and pbc: https://wiki.fysik.dtu.dk/ase/ase/atoms.html
   atoms_dict = {
@@ -35,7 +35,7 @@ def create_ase_atoms_obj(
   return res
 
 
-def create_ase_atoms_obj_from_xyz_data(xyz_data: Dict) -> Atoms:
+def create_ase_atoms_from_xyz_data(xyz_data: Dict) -> Atoms:
 
   xyz_lines_are_strings = True \
                             if isinstance(xyz_data["xyz_lines"][0], str) \
@@ -54,19 +54,19 @@ def create_ase_atoms_obj_from_xyz_data(xyz_data: Dict) -> Atoms:
       info[k] = xyz_data[k]
 
 
-  return create_ase_atoms_obj(
+  return create_ase_atoms(
                               atomic_nrs=atomic_nrs,
                               coords=elem_coords["coords"],
                               info=info
                             )
 
 
-def create_ase_atom_objects_from_xyz_file(input_path: Path, name: str) -> List[Atoms]:
+def create_ase_atoms_list_from_xyz_file(input_path: Path, name: str) -> List[Atoms]:
   add_info = {
     "name": name,
     }
 
-  res = [create_ase_atoms_obj_from_xyz_data({**x, **add_info}) for x in xyz_parser.read_xyz_file(
+  res = [create_ase_atoms_from_xyz_data({**x, **add_info}) for x in xyz_parser.read_xyz_file(
                                                               input_path=input_path,
                                                               convert_coords_to_float=True
                                                             )
@@ -74,10 +74,10 @@ def create_ase_atom_objects_from_xyz_file(input_path: Path, name: str) -> List[A
   return res
 
 
-def create_ase_atom_objects_from_dataset(dataset: Dataset) -> List[Atoms]:
+def create_ase_atoms_list_from_dataset(dataset: Dataset) -> List[Atoms]:
   res = []
   for i in range(len(dataset)):
-    mols_from_file = create_ase_atom_objects_from_xyz_file(
+    mols_from_file = create_ase_atoms_list_from_xyz_file(
                                                             input_path=dataset[i],
                                                             name=dataset.names[i]
                                                           )
