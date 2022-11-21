@@ -1,4 +1,5 @@
 *.pyc
+examples/.ipynb_checkpoints/*.*
 data/*.*
 playground/*.*
 ase_tester.py
