@@ -64,9 +64,6 @@ def create_ase_atoms_list_from_xyz_file(
                                           input_path: Path,
                                           name: str
                                         ) -> List[Atoms]:
-  # add_info = {
-  #   "name": name,
-  #   }
 
   parsed_xyz_data = [x for x in xyz_parser.read_xyz_file(
                                               input_path=input_path,
@@ -86,15 +83,8 @@ def create_ase_atoms_list_from_xyz_file(
       # single xyz geometry or no idx information
       xyz["name"] = name
 
-    # xyz = {**xyz, **add_info}
-
   res = [create_ase_atoms_from_xyz_data(x) for x in parsed_xyz_data]
 
-  # res = [create_ase_atoms_from_xyz_data({**x, **add_info}) for x in xyz_parser.read_xyz_file(
-  #                                                             input_path=input_path,
-  #                                                             convert_coords_to_float=True
-  #                                                           )
-  #       ]
   return res
 
 
