@@ -79,8 +79,27 @@ class Dataset():
         return False
     return True
 
+  # def merge_with(self, other_dataset: Dataset) -> Dataset:
+  #   return merge_datasets(self, other_dataset)
 
   def remove(self, idx: int):
     if self[idx] != None:
       self.file_paths.pop(idx)
       self.names.pop(idx)
+
+
+def merge_datasets(
+                    dataset1: Dataset,
+                    dataset2: Dataset,
+                    description: str
+                  ):
+
+  res = Dataset.create_with_names(
+                    description=description,
+                    paths_with_names=[(p,n) for p,n in zip(dataset1.file_paths, dataset1.names)]
+                  )
+
+  for p,n in zip(dataset2.file_paths, dataset2.names):
+    res.add(file_path=p, name=n)
+
+  return res
