@@ -15,59 +15,12 @@ import xyz_parser
 # Gaussian logfile parsing
 ################################################################
 
-def read_xyz_geometry_from_gaussian_logfile(log_file_path: Union[str, Path]) -> Dict:
-  results_key = "results"
-  error_key = "error"
-  res = {
-      results_key: "",
-      error_key: "",
-      "results_key": results_key,
-      "error_key": error_key
-    }
-
-  try:
-    all_text = Path(log_file_path).read_text()
-    start_text = "Unable to Open any file for archive entry."
-    end_text = "The archive entry for this job was punched."
-
-    if not (start_text in all_text and end_text in all_text):
-      res[error_key] = f"Error: Final xyz block not found. Expected to be between phrases: '{start_text}' and '{end_text}'. Input file: {Path(log_file_path).absolute()}"
-
-    else:
-      split1 = all_text.split(sep=start_text)
-      split2 = split1[1].split(sep=end_text)
-      middle_text = split2[0]
-
-      middle_cleaned = middle_text.replace("\n", "").replace("\\", "\n")
-      middle_start, xyz = middle_cleaned.split("Versio")[0].split("0,1")
-
-      xyz_cleaned = xyz.replace(" ", "").replace(",", "    ")[1:]
-
-      middle_start_cleaned = middle_start.replace("\n", ", ") \
-        .replace("0, ", "").replace("1, ", "").replace("#", "") \
-        .replace(", , ", ", ").replace(", ", " ")
-
-      middle_end = "Versio" + middle_cleaned.split("Versio")[1] \
-        .replace(" ", "").replace("\n", ", ").replace("@", "") \
-        .replace(", , ", ", ").replace(", ", " ")
-
-      num_atoms = len([i for i in xyz_cleaned.split("\n") if len(i) > 10])
-
-      xyz_final = f"{num_atoms}\n{middle_start_cleaned}, {middle_end}\n{xyz_cleaned}"
-      res[results_key] = xyz_final
-
-  except Exception as ex:
-    res[error_key] = str(ex)
-
-  return res
-
 
 def write_xyz_from_gaussian_logfile(
                                     log_file_path: Union[str, Path],
                                     output_path: Union[str, Path]
                                     ) -> int:
 
-  #xyz_from_gaussian_log = read_xyz_geometry_from_gaussian_logfile(log_file_path)
   xyz_from_gaussian_log = extract_final_xyz(log_file_path)
 
   results_key = "results"
@@ -83,20 +36,12 @@ def write_xyz_from_gaussian_logfile(
                         and len(xyz_from_gaussian_log[results_key]) > 1 \
                      else False
 
-  # has_results = True if results_key in xyz_from_gaussian_log \
-  #                       and xyz_from_gaussian_log[results_key] != None \
-  #                       and len(xyz_from_gaussian_log[results_key].strip()) > 1 \
-  #                    else False
-
   if has_results:
     return ut.write_text_file_from_lines(
       file_path=output_path,
       lines=xyz_from_gaussian_log[results_key]
     )
-    # return ut.write_text_file(
-    #                         file_name=output_path,
-    #                         text=xyz_from_gaussian_log[results_key]
-    #                       )
+
   elif is_error:
     return xyz_from_gaussian_log[error_key]
   else:
