@@ -339,6 +339,22 @@ def write_scf_summary_from_gaussian_logfile(
     return str(ex)
 
 
+def get_gaussian_log_file_type(file_path: Union[str, Path]) -> str:
+
+  lines = ut.read_text_file_as_lines(file_path=file_path)
+
+  optimization_line_nrs = ut.get_block_start_line_nrs(
+        lines=lines,
+        search_text="GradGradGradGradGradGradGradGradGradGradGrad"
+      )
+
+  res = "energy"
+  if optimization_line_nrs and len(optimization_line_nrs) > 0:
+    res = "optimization"
+
+  return res
+
+
 def process_one_log_file(
                     input_path: Union[str, Path],
                     output_dir: Union[str, Path]=None,
@@ -356,23 +372,32 @@ def process_one_log_file(
 
   task_results = {}
 
+  gaussian_log_file_type = get_gaussian_log_file_type(file_path=input_path)
+
   output_path_xyz = Path(out_dir).joinpath(f"{output_file_name_stem}.xyz")
   task_results["final_xyz"] = write_xyz_from_gaussian_logfile(
                                     log_file_path=input_path,
                                     output_path=output_path_xyz
                                     )
 
-  output_path_opt_steps = Path(out_dir).joinpath(f"{output_file_name_stem}_opt_steps.xyz")
-  task_results["opt_steps"] = write_optimization_steps_from_gaussian_logfile(
-                                    log_file_path=input_path,
-                                    output_path=output_path_opt_steps
-                                    )
+  if gaussian_log_file_type.startswith("optim"):
+    output_path_opt_steps = Path(out_dir).joinpath(f"{output_file_name_stem}_opt_steps.xyz")
+    task_results["opt_steps"] = write_optimization_steps_from_gaussian_logfile(
+                                      log_file_path=input_path,
+                                      output_path=output_path_opt_steps
+                                      )
 
-  output_path_last_opt_step = Path(out_dir).joinpath(f"{output_file_name_stem}_last_step.xyz")
-  task_results["last_opt_step"] = write_last_optimization_step_from_gaussian_logfile(
-                                    log_file_path=input_path,
-                                    output_path=output_path_last_opt_step
-                                    )
+    output_path_last_opt_step = Path(out_dir).joinpath(f"{output_file_name_stem}_last_step.xyz")
+    task_results["last_opt_step"] = write_last_optimization_step_from_gaussian_logfile(
+                                      log_file_path=input_path,
+                                      output_path=output_path_last_opt_step
+                                      )
+  else:
+    output_path_standard_orientation = Path(out_dir).joinpath(f"{output_file_name_stem}_standard_orientation.xyz")
+    task_results["standard_orientation"] = write_last_optimization_step_from_gaussian_logfile(
+                                      log_file_path=input_path,
+                                      output_path=output_path_standard_orientation
+                                      )
 
   output_path_scf = Path(out_dir).joinpath(f"{output_file_name_stem}_scf_summary.txt")
   task_results["scf_summary"] = write_scf_summary_from_gaussian_logfile(
