@@ -100,3 +100,10 @@ def get_block_start_line_nrs(
 
   return [i for i,x in enumerate(lines) if search_text in x]
 
+
+def get_line_nrs_starts_with_text(
+                              lines: List[str],
+                              search_text: str,
+                              ) -> List[int]:
+
+  return [i for i,x in enumerate(lines) if x.startswith(search_text)]
