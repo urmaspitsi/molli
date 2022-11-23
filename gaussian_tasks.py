@@ -108,7 +108,26 @@ output_dir = "C:/tmp/gaussian/jobs_logs2"
 GU.process_many_log_files(
                           input_paths=gaussian_log_files,
                           output_dir=output_dir,
-                          aggregate_log_file_name="aggregate1.txt"
+                          aggregate_log_file_name="aggregate2.txt"
                           )
 
+#%%
+# Test extracting final xyz
+
+gaussian_log_file = Path("C:/tmp/gaussian/jobs_results/mol24_PBE1PBE_cc_pVTZTZVPFit_energy/job.log")
+
+output_path = "C:/tmp/gaussian/jobs_logs2/aaa_xyz_test.txt"
+
+xyz_lines = GU.extract_final_xyz(file_path=gaussian_log_file)["results"]
+
+ut.write_text_file_from_lines(
+                              file_path=output_path,
+                              lines=xyz_lines
+                            )
+
+
+# %%
+len(xyz_lines)
+# %%
+xyz_lines
 # %%
