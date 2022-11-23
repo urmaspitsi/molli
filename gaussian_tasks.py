@@ -98,6 +98,7 @@ GU.process_many_log_files(
 
 gaussian_log_files = [
   Path("C:/tmp/gaussian/jobs_results/mol24_PBE1PBE_cc_pVTZTZVPFit_energy/job.log"),
+  Path("C:/tmp/gaussian/jobs_results/mol24_PBE1PBE_cc_pVTZTZVPFit_energy_g02/job.log"),
   Path("C:/tmp/gaussian/jobs_juhan/mol5_mol24_PBE1PBE_cc_pVTZ_TZVPFit/mol5_PBE1PBE_cc_pVTZ_TZVPFit_job.log"),
   Path("C:/tmp/gaussian/jobs_juhan/mol5_mol24_PBE1PBE_cc_pVTZ_TZVPFit/mol24_PBE1PBE_cc_pVTZ_TZVPFit_job.log"),
 
@@ -108,7 +109,7 @@ output_dir = "C:/tmp/gaussian/jobs_logs2"
 GU.process_many_log_files(
                           input_paths=gaussian_log_files,
                           output_dir=output_dir,
-                          aggregate_log_file_name="aggregate2.txt"
+                          aggregate_log_file_name="aggregate1.txt"
                           )
 
 #%%
