@@ -67,7 +67,8 @@ def write_xyz_from_gaussian_logfile(
                                     output_path: Union[str, Path]
                                     ) -> int:
 
-  xyz_from_gaussian_log = read_xyz_geometry_from_gaussian_logfile(log_file_path)
+  #xyz_from_gaussian_log = read_xyz_geometry_from_gaussian_logfile(log_file_path)
+  xyz_from_gaussian_log = extract_final_xyz(log_file_path)
 
   results_key = "results"
   error_key = "error"
@@ -79,14 +80,23 @@ def write_xyz_from_gaussian_logfile(
 
   has_results = True if results_key in xyz_from_gaussian_log \
                         and xyz_from_gaussian_log[results_key] != None \
-                        and len(xyz_from_gaussian_log[results_key].strip()) > 1 \
+                        and len(xyz_from_gaussian_log[results_key]) > 1 \
                      else False
 
+  # has_results = True if results_key in xyz_from_gaussian_log \
+  #                       and xyz_from_gaussian_log[results_key] != None \
+  #                       and len(xyz_from_gaussian_log[results_key].strip()) > 1 \
+  #                    else False
+
   if has_results:
-    return ut.write_text_file(
-                            file_name=output_path,
-                            text=xyz_from_gaussian_log[results_key]
-                          )
+    return ut.write_text_file_from_lines(
+      file_path=output_path,
+      lines=xyz_from_gaussian_log[results_key]
+    )
+    # return ut.write_text_file(
+    #                         file_name=output_path,
+    #                         text=xyz_from_gaussian_log[results_key]
+    #                       )
   elif is_error:
     return xyz_from_gaussian_log[error_key]
   else:
@@ -153,6 +163,67 @@ def extract_opt_step_as_xyz_lines(
                                     )
 
   return final_xyz_block
+
+
+def extract_final_xyz(
+                      file_path: Union[str, Path],
+                      ) -> List[str]:
+
+  results_key = "results"
+  error_key = "error"
+  res = {
+      results_key: "",
+      error_key: "",
+      "results_key": results_key,
+      "error_key": error_key
+    }
+
+  try:
+
+    lines = ut.read_text_file_as_lines(file_path=file_path)
+
+    start_line = ut.get_block_start_line_nrs(
+                  lines=lines,
+                  search_text="Unable to Open any file for archive entry."
+                  )[0]
+
+    end_line = ut.get_block_start_line_nrs(
+                  lines=lines,
+                  search_text="The archive entry for this job was punched."
+                  )[0]
+
+    new_str = "".join([lines[i].strip() for i in range(start_line, end_line)])
+    new_lines = new_str.split("\\")
+    new_lines = [x.strip() for x in new_lines]
+    
+    xyz_start_line = ut.get_line_nrs_starts_with_text(
+                                              lines=new_lines,
+                                              search_text="0,1"
+                                              )[0]
+
+    xyz_end_line = ut.get_line_nrs_starts_with_text(
+                                            lines=new_lines,
+                                            search_text="Version="
+                                            )[0]
+
+    new_lines = new_lines[(xyz_start_line + 1):xyz_end_line]
+    new_lines = [line.split(",") for line in new_lines if len(line) > 8]
+    new_lines = [xyz_parser.convert_xyz_coords_to_str(
+        element=line[0],
+        x=float(line[2].strip()),
+        y=float(line[3].strip()),
+        z=float(line[4].strip())
+      ) for line in new_lines]
+
+    num_atoms = len(new_lines)
+    description = f"final xyz from {file_path.name}"
+
+    res[results_key] = [f"{num_atoms}"] + [description] + new_lines
+
+  except Exception as ex:
+    res[error_key] = str(ex)
+
+  return res
 
 
 def extract_optimization_steps_as_xyz(
