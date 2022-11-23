@@ -107,7 +107,8 @@ output_dir = "C:/tmp/gaussian/jobs_logs2"
 
 GU.process_many_log_files(
                           input_paths=gaussian_log_files,
-                          output_dir=output_dir
+                          output_dir=output_dir,
+                          aggregate_log_file_name="aggregate1.txt"
                           )
 
 # %%
