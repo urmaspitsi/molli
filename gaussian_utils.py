@@ -375,7 +375,8 @@ def process_one_log_file(
 
 def process_many_log_files(
                             input_paths: List[Union[str, Path]],
-                            output_dir: Union[str, Path]=None
+                            output_dir: Union[str, Path]=None,
+                            aggregate_log_file_name: str="aggregate_log.txt"
                             ):
 
   res = [process_one_log_file(x, output_dir) for x in input_paths]
@@ -389,7 +390,7 @@ def process_many_log_files(
 
   if output_dir != None:
     ut.write_text_file_json(
-        file_name=Path(output_dir).joinpath("aggregate_log.txt"),
+        file_name=Path(output_dir).joinpath(aggregate_log_file_name),
         data=res
       )
 
