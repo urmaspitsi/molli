@@ -200,7 +200,8 @@ def extract_optimization_steps_as_xyz(
 
 def extract_scf_summary(
                         file_path: Union[str, Path],
-                        collect_to_single_list: bool
+                        collect_to_single_list: bool,
+                        max_step_nr: int=0
                         ) -> List[str]:
 
   result_summary_dict = {}
@@ -209,6 +210,11 @@ def extract_scf_summary(
                                             lines=lines,
                                             search_text="SCF Done:"
                                             )
+
+  # Collect summary at the max_step_nr
+  if len(block_lines) > 1 and max_step_nr > 0:
+    block_lines = block_lines[:max_step_nr]
+
 
   num_steps = len(block_lines)
   text_lines = []
