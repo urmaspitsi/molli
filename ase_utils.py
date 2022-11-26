@@ -111,3 +111,9 @@ def compare_if_molecules_are_equal(mol1: Atoms, mol2: Atoms) -> bool:
               atol=1e-08,
               equal_nan=True
             )
+
+
+def rmsd_of_distances(mol1: Atoms, mol2: Atoms) -> float:
+  d1 = mol1.get_all_distances()
+  d2 = mol2.get_all_distances()
+  return np.sqrt(np.mean((d1 - d2)**2))
