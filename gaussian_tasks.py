@@ -14,31 +14,29 @@ import utils as ut
 # Create Gaussian job files: convert from .xyz trajectory (opt steps) file.
 ############################################################################
 
-#xyz_steps_file = Path("C:/tmp/gaussian/crest_mol24_ex15_BP86_STO3G/mol24_ex15_gfnff_crest_conformers.xyz")
-# mol24_ex15_gfnff_crest_conformers
+#xyz_file = Path("C:/tmp/gaussian/crest_mol24_ex15_BP86_STO3G/mol24_ex15_gfnff_crest_conformers.xyz")
+#xyz_file = Path("C:/tmp/gaussian/crest_mol24_ex15_BP86_STO3G/mol24_ex16_gfn2_crest_conformers.xyz")
 
-#xyz_steps_file = Path("C:/tmp/gaussian/crest_mol24_ex15_BP86_STO3G/mol24_ex16_gfn2_crest_conformers.xyz")
-# mol24_ex16_gfn2_crest_conformers
-
-#xyz_steps_file = Path("C:/tmp/gaussian/input/mol24_ex16_gfn2_crest_conformers.xyz") # mol24_ex16_gfn2_crest_conformers
-xyz_steps_file = Path("C:/tmp/gaussian/input/mol24_ex15_gfnff_crest_conformers.xyz") # mol24_ex15_gfnff_crest_conformers
+#xyz_file = Path("C:/tmp/gaussian/input/mol24_ex16_gfn2_crest_conformers.xyz")
+#xyz_file = Path("C:/tmp/gaussian/input/mol24_ex15_gfnff_crest_conformers.xyz")
+xyz_file = Path("C:/tmp/gaussian/input/mol24_ex19_gfn2_crestconfs_from_ex16_crest5.xyz")
 
 gaussian_jobs_output_dir = Path("C:/tmp/gaussian/test_jobs") #
 
 lines_to_prepend = [
-    "#T BP86/Def2SVPP/SVPFit opt=(calcfc,maxcycles=10) formcheck",
+    "#T BP86/Def2SVPP/SVPFit opt=(calcfc,maxcycles=5) formcheck",
     "",
-    "mol24_ex15_gfnff_crest_conformers",
+    "mol24_ex19_gfn2_crestconfs_from_ex16_crest5",
     "",
     "0 1",
   ]
 
 gaussian_job_files = GU.create_gaussian_job_files_from_xyz_steps(
-                            input_path=xyz_steps_file,
+                            input_path=xyz_file,
                             output_dir=gaussian_jobs_output_dir,
                             lines_before_xyz_coords=lines_to_prepend,
-                            step_nrs_to_write=list(range(1, 12)),
-                            job_file_name_prefix="mol24_ex15_gfnff_bp86_def2svpp_svpfit_crest_"
+                            step_nrs_to_write=list(range(1, 62)),
+                            job_file_name_prefix="mol24_ex19_gfn2_bp86_def2svpp_svpfit_crest_"
                           )
 
 
@@ -49,17 +47,26 @@ gaussian_job_files = GU.create_gaussian_job_files_from_xyz_steps(
 ############################################################################
 
 log_files_dirs = [
-    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex15_BP86_STO3G_results"),
+#    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex15_BP86_STO3G_results"),
+#    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex15_BP86_STO3G_results"),
     Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex15_BP86_Def2SVPP_SVPFit_results"),
   ]
 
 gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
 
-output_dir = "C:/tmp/gaussian/crest_reoptimize/logs"
+#output_dir = "C:/tmp/gaussian/crest_reoptimize/logs"
+output_dir = "C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex15_BP86_Def2SVPP_SVPFit_logs"
+
+#aggregate_log_file_name = "aggregate.log"
+#aggregate_log_file_name = "ex15_bp86_sto3g_step10.log"
+aggregate_log_file_name = "ex15_bp86_def2svpp_svpfit.log"
 
 GU.process_many_log_files(
                           input_paths=gaussian_log_files,
-                          output_dir=output_dir
+                          output_dir=output_dir,
+                          aggregate_log_file_name=aggregate_log_file_name,
+#                          extract_summary_step_nr=10,
+#                          do_only_summary=True
                           )
 
 
@@ -85,9 +92,12 @@ gaussian_log_files = [Path(f"C:/tmp/gaussian/jobs_results/{x}/job.log") for x in
 
 output_dir = "C:/tmp/gaussian/jobs_logs"
 
+aggregate_log_file_name = "aggregate.log"
+
 GU.process_many_log_files(
                           input_paths=gaussian_log_files,
-                          output_dir=output_dir
+                          output_dir=output_dir,
+                          aggregate_log_file_name=aggregate_log_file_name
                           )
 
 
@@ -108,10 +118,12 @@ gaussian_log_files = [
 
 output_dir = "C:/tmp/gaussian/jobs_logs2"
 
+aggregate_log_file_name = "aggregate.log"
+
 GU.process_many_log_files(
                           input_paths=gaussian_log_files,
                           output_dir=output_dir,
-                          aggregate_log_file_name="aggregate1.txt"
+                          aggregate_log_file_name=aggregate_log_file_name
                           )
 
 #%%
