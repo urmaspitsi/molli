@@ -417,7 +417,7 @@ def process_one_log_file(
 def process_many_log_files(
                             input_paths: List[Union[str, Path]],
                             output_dir: Union[str, Path]=None,
-                            aggregate_log_file_name: str="aggregate_log.txt"
+                            aggregate_log_file_name: str="aggregate.log"
                             ):
 
   res = [process_one_log_file(x, output_dir) for x in input_paths]
