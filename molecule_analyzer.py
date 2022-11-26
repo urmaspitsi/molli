@@ -1,18 +1,12 @@
-import copy
 from dataclasses import dataclass, field
-from datetime import datetime
-import json
 import numpy as np
-import os
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
-import ase
-import ase.io as ase_io
 from ase import Atoms
-from ase import constraints as ase_constraints
-from ase.constraints import FixInternals
 
+import ase_utils as au
+from dataset import Dataset
 import features as ft
 
 # Dataset: List[Path]
@@ -108,3 +102,31 @@ def calculate_values_groupby_molecules(
 
   return res
 
+
+def calculate_dataset_list(
+                            dataset_list: List[Dataset],
+                            features_list: List[ft.Feature]
+                        ) -> List[Dict]:
+
+  res = []
+
+  for dset in dataset_list:
+    dset_dict = {}
+    dset_dict["dataset_description"] = dset.description
+    dset_dict["dataset_sources"] = dset.names
+    molecules = au.create_ase_atoms_list_from_dataset(dset)
+    dset_dict["molecules"] = molecules
+    dset_dict["molecules_names"] = [x.info["name"] for x in molecules]
+
+    dset_dict["features_list"] = features_list
+    dset_dict["features_info"] = []
+    if len(molecules) > 0:
+      dset_dict["features_info"] = [x.get_info(molecules[0]) for x in features_list]
+
+    dset_dict["calc_by_features"] = calculate_values_groupby_features(
+                                          molecules=molecules,
+                                          features_list=features_list
+                                        )
+    res.append(dset_dict)
+
+  return res
