@@ -153,11 +153,13 @@ def extract_final_xyz(
 
     new_lines = new_lines[(xyz_start_line + 1):xyz_end_line]
     new_lines = [line.split(",") for line in new_lines if len(line) > 8]
+    skip_2nd_col = True if len(new_lines[0]) > 4 else False # energy logs have atomic nr in second col.
+    col_x = 2 if skip_2nd_col else 1
     new_lines = [xyz_parser.convert_xyz_coords_to_str(
         element=line[0],
-        x=float(line[2].strip()),
-        y=float(line[3].strip()),
-        z=float(line[4].strip())
+        x=float(line[col_x].strip()),
+        y=float(line[col_x + 1].strip()),
+        z=float(line[col_x + 2].strip())
       ) for line in new_lines]
 
     num_atoms = len(new_lines)
@@ -210,6 +212,16 @@ def extract_scf_summary(
                                             lines=lines,
                                             search_text="SCF Done:"
                                             )
+
+  converged_line_nrs = ut.get_block_start_line_nrs(
+                                            lines=lines,
+                                            search_text="Stationary point found"
+                                            )
+  is_converged = True \
+    if converged_line_nrs and len(converged_line_nrs) > 0 \
+    else False
+
+  result_summary_dict["optimization_converged"] = is_converged
 
   # Collect summary at the max_step_nr
   if len(block_lines) > 1 and max_step_nr > 0:
