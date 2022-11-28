@@ -1,3 +1,5 @@
+from ase import units as ase_units
+
 
 atomic_numbers_to_elements = {
     1:'H',2:'He',3:'Li',4:'Be',5:'B',6:'C',7:'N',8:'O',9:'F',10:'Ne',\
@@ -12,6 +14,8 @@ atomic_numbers_to_elements = {
     83:'Bi',84:'Po',85:'At',86:'Rn',87:'Fr',88:'Ra',89:'Ac',90:'Th',91:'Pa',\
     92:'U',93:'Np',94:'Pu',95:'Am',96:'Cm',97:'Bk',98:'Cf',99:'Es',100:'Fm',
   }
+
+hartree_in_kcal_per_mol = ase_units.Hartree * ase_units.mol / ase_units.kcal
 
 
 def convert_elements_to_numbers():
