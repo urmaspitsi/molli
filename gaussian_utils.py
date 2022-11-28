@@ -235,7 +235,10 @@ def extract_scf_summary(
   try:
     energy_start = float(lines[block_lines[0]].split("  ")[2])
     energy_end = float(lines[block_lines[-1]].split("  ")[2])
-    energy_delta = str(round(energy_end - energy_start, 8)).rstrip()
+    energy_delta = energy_end - energy_start
+    energy_delta_kcal_per_mol = round(energy_delta * C.hartree_in_kcal_per_mol, 2)
+    energy_delta = round(energy_delta, 8)
+
   except Exception as ex:
     energy_delta = str(ex)
 
@@ -264,12 +267,16 @@ def extract_scf_summary(
     result_summary_dict["energy_start"] = energy_start
     result_summary_dict["energy_end"] = energy_end
     result_summary_dict["energy_delta"] = energy_delta
+    result_summary_dict["energy_delta_kcal_per_mol"] = energy_delta_kcal_per_mol
+
+    #energy_delta = str(energy_delta).rstrip()
+    #energy_delta_kcal_per_mol = str(energy_delta_kcal_per_mol).rstrip()
 
   except Exception as ex:
     elapsed_time = str(ex)
     result_summary_dict["error"] = str(ex)
 
-  scf_data = [separator_row, f"SCF: change in energy = {energy_delta}   {elapsed_time}   {minutes_per_step} min/step", separator_row] \
+  scf_data = [separator_row, f"SCF: change in energy = {energy_delta}({energy_delta_kcal_per_mol} kcal/mol)   {elapsed_time}   {minutes_per_step} min/step", separator_row] \
     + [f"{i + 1}:" + " " * (4 - len(str(i + 1))) + lines[x].replace("\n", "") for i,x in enumerate(block_lines)] \
     + ["\n"]
 
@@ -454,10 +461,21 @@ def process_many_log_files(
           ) for x in input_paths]
 
   # try sort ascending by final energy
+  energy_diff = 0
   try:
     res.sort(key= lambda x: x["results"]["scf_summary"]["energy_end"])
+    best_energy = res[0]["results"]["scf_summary"]["energy_end"]
+    worst_energy = res[-1]["results"]["scf_summary"]["energy_end"]
+    energy_diff = round((best_energy - worst_energy) * C.hartree_in_kcal_per_mol, 2)
   except:
     pass
+
+  summary = {
+    "num_experiments": len(res),
+    "energy_diff_best_worst_kcal_per_mol": energy_diff
+  }
+
+  res.insert(0, summary)
 
   if output_dir != None:
     ut.write_text_file_json(
