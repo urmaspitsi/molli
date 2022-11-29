@@ -1,8 +1,10 @@
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 import numpy as np
 
 from ase import Atoms
+from ase.build import minimize_rotation_and_translation
 
 import constants as C
 from dataset import Dataset
@@ -117,3 +119,15 @@ def rmsd_of_distances(mol1: Atoms, mol2: Atoms) -> float:
   d1 = mol1.get_all_distances()
   d2 = mol2.get_all_distances()
   return np.sqrt(np.mean((d1 - d2)**2))
+
+def align_2_molecules_min_rmsd(target: Atoms, atoms_to_align: Atoms) -> Atoms:
+  '''
+    Aligns atoms_to_align with target, based on min rmsd.
+    Returns copy of atoms_to_align with new position coordinates.
+  '''
+
+  res = deepcopy(atoms_to_align)
+  minimize_rotation_and_translation(target, res)
+
+  return res
+
