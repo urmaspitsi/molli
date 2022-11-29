@@ -20,14 +20,20 @@ import utils as ut
 #xyz_file = Path("C:/tmp/gaussian/input/mol24_ex16_gfn2_crest_conformers.xyz")
 #xyz_file = Path("C:/tmp/gaussian/input/mol24_ex15_gfnff_crest_conformers.xyz")
 #xyz_file = Path("C:/tmp/gaussian/input/mol24_ex23_gfn2_crestconfs_from_ex16_crest3.xyz")
-xyz_file = Path("C:/tmp/gaussian/input/mol24_ex21_gfnff_crestconfs_from_ex16_crest5.xyz")
+#xyz_file = Path("C:/tmp/gaussian/input/mol24_ex21_gfnff_crestconfs_from_ex16_crest5.xyz")
+xyz_file = Path("C:/tmp/gaussian/input/mol24_ex0a_gfn2_crestconfs.xyz")
 
 gaussian_jobs_output_dir = Path("C:/tmp/gaussian/test_jobs") #
 
+#    "#T PBE1PBE/Def2SVPP/SVPFit opt=(calcfc,maxcycles=10) formcheck",
+#    "#T BP86/Def2SVPP/SVPFit opt=(calcfc,maxcycles=10) formcheck",
+#    "#T BP86/STO-3G opt=(calcfc,maxcycles=25) formcheck",
+#    "#T PBE1PBE/STO-3G opt=(calcfc,maxcycles=25) formcheck",
+
 lines_to_prepend = [
-    "#T PBE1PBE/Def2SVPP/SVPFit opt=(calcfc,maxcycles=50) formcheck",
+    "#T PBE1PBE/STO-3G opt=(calcfc,maxcycles=25) formcheck",
     "",
-    "mol24_ex21_gfnff_crestconfs_from_ex16_crest5",
+    "mol24_ex0a_gfn2_crestconfs",
     "",
     "0 1",
   ]
@@ -36,8 +42,8 @@ gaussian_job_files = GU.create_gaussian_job_files_from_xyz_steps(
                             input_path=xyz_file,
                             output_dir=gaussian_jobs_output_dir,
                             lines_before_xyz_coords=lines_to_prepend,
-                            step_nrs_to_write=[], #list(range(1, 62)),
-                            job_file_name_prefix="mol24_ex21_gfnff_pbe1pbe_def2svpp_svpfit_crest_"
+                            step_nrs_to_write=list(range(1, 62)),
+                            job_file_name_prefix="mol24_ex0a_gfn2_pbe1pbe_sto3g_crest_"
                           )
 
 
@@ -48,8 +54,7 @@ gaussian_job_files = GU.create_gaussian_job_files_from_xyz_steps(
 ############################################################################
 
 log_files_dirs = [
-
-    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex19_s1_PBE1PBE_Def2SVPP_SVPFit_results"),
+    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex0a_PBE1PBE_STO3G_results"),
 #    Path("C:/tmp/gaussian/jobs_juhan/jobs_juhan_results"),
 
   ]
@@ -57,14 +62,14 @@ log_files_dirs = [
 gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
 
 #output_dir = Path("C:/tmp/gaussian/jobs_juhan/jobs_juhan_logs")
-output_dir = "C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex19_s1_PBE1PBE_Def2SVPP_SVPFit_logs"
+output_dir = "C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex0a_PBE1PBE_STO3G_logs"
 #output_dir = "C:/tmp/gaussian/jobs_logs_bp86_def2svpp_svpfit"
 #output_dir = "C:/tmp/gaussian/jobs_logs_pbe1pbe_def2svpp_svpfit"
 #output_dir = log_files_dirs[0]
 
-aggregate_log_file_name = "ex19_aggregate_log.txt"
+#aggregate_log_file_name = "aggregate_log.txt"
 #aggregate_log_file_name = "ex15_bp86_sto3g_step10_log.txt"
-#aggregate_log_file_name = "ex21_bp86_sto3g_log.txt"
+aggregate_log_file_name = "ex0a_pbe1pbe_sto3g_log.txt"
 #aggregate_log_file_name = "bp86_def2svpp_svpfit_log.txt"
 #aggregate_log_file_name = "pbe1pbe_def2svpp_svpfit_log.txt"
 
@@ -73,7 +78,7 @@ GU.process_many_log_files(
                           output_dir=output_dir,
                           aggregate_log_file_name=aggregate_log_file_name,
 #                          extract_summary_step_nr=10,
-                          do_only_summary=True
+#                          do_only_summary=True
                           )
 
 
