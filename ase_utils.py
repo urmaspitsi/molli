@@ -132,3 +132,38 @@ def rmsd_of_distances(mol1: Atoms, mol2: Atoms) -> float:
   d2 = mol2.get_all_distances()
   return np.sqrt(np.mean((d1 - d2)**2))
 
+
+def try_get_info_item_from_atoms(mol: Atoms, info_key: str) -> str:
+  try:
+    if info_key in mol.info:
+      return mol.info[info_key]
+    else:
+      return ""
+  except:
+    return ""
+
+
+def try_get_name_from_atoms(mol: Atoms) -> str:
+  return try_get_info_item_from_atoms(mol, info_key="name")
+
+
+def try_get_description_from_atoms(mol: Atoms) -> str:
+  return try_get_info_item_from_atoms(mol, info_key="description")
+
+
+def write_ase_atoms_to_xyz_file(
+            atoms_list: List[Atoms],
+            output_path: Union[str, Path]
+            ) -> None:
+
+  res = []
+  for mol in atoms_list:
+    description = f"{try_get_name_from_atoms(mol)} {try_get_description_from_atoms(mol)}"
+    lines = [xyz_parser.convert_xyz_coords_to_str(el, x, y, z) \
+              for el, (x,y,z) in zip(mol.get_chemical_symbols(), list(mol.positions))]
+
+    res.append(len(lines))
+    res.append(description)
+    res.extend(lines)
+
+  return ut.write_text_file_from_lines(file_path=output_path, lines=res)
