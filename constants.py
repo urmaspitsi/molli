@@ -17,6 +17,8 @@ atomic_numbers_to_elements = {
 
 hartree_in_kcal_per_mol = ase_units.Hartree * ase_units.mol / ase_units.kcal
 
+hartree_in_kJ_per_mol = ase_units.Hartree * ase_units.mol / ase_units.kJ
+
 
 def convert_elements_to_numbers():
   elem2nr = {}
