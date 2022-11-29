@@ -120,6 +120,7 @@ def rmsd_of_distances(mol1: Atoms, mol2: Atoms) -> float:
   d2 = mol2.get_all_distances()
   return np.sqrt(np.mean((d1 - d2)**2))
 
+
 def align_2_molecules_min_rmsd(target: Atoms, atoms_to_align: Atoms) -> Atoms:
   '''
     Aligns atoms_to_align with target, based on min rmsd.
