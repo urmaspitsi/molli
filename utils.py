@@ -86,8 +86,12 @@ def write_text_file_from_lines(
 
   with open(file_path, 'w') as f:
     for line in lines:
-      f.write(line)
-      if len(line) < 2 or ("\n" not in line[-1:]):
+      if isinstance(line, str):
+        f.write(line)
+        if len(line) < 2 or ("\n" not in line[-1:]):
+          f.write("\n")
+      else:
+        f.write(f"{line}")
         f.write("\n")
 
   return str(file_path)
