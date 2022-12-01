@@ -157,10 +157,10 @@ def split_xyz_lines_elements_coords_from_tuple(xyz_lines: List[Tuple[str, List[f
         }
 
 
-def write_xyz_file_from_dict(
+def write_xyz_file_from_list_of_dicts(
                               output_path: Union[str, Path],
                               xyz_as_list_of_dicts: List[Dict]
-                            ) -> int:
+                            ) -> str:
   '''
     Writes xyz dictionary into text file.
     Reverse function to 'read_xyz_file(...)'
@@ -175,3 +175,29 @@ def write_xyz_file_from_dict(
           file_path=output_path,
           lines=res
         )
+
+
+def write_xyz_files_into_one(
+      list_of_input_path_and_idx_tuples: List[Tuple[Union[str, Path], Union[int, List[int]]]],
+      output_path: Union[str, Path],
+    ) -> str:
+  '''
+    Reads input xyz files and aggregates them into one xyz file.
+    If idx is specified, then takes only xyz block with that index,
+    file contains more than 1 xyz blocks, eg optimization trajectory file,
+    or conformers file.
+    Writes the resulting data into one xyz file specified by output_path.
+    Returns full path of the output file, if successful.
+    Otherwise returns error message as string.
+  ''' 
+
+  xyz_data = read_xyz_many_files(
+    list_of_input_path_and_idx_tuples=list_of_input_path_and_idx_tuples,
+    convert_coords_to_float=False
+    )
+
+  return write_xyz_file_from_list_of_dicts(
+          output_path=output_path,
+          xyz_as_list_of_dicts=xyz_data
+          )
+
