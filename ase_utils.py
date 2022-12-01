@@ -80,6 +80,8 @@ def calculate_rmsd_between_xyz_files(
       if i != j and rmsd_val < max_value:
         less_than_max_value.append(("target_source_rmsd", i, j, rmsd_val))
 
+  less_than_max_value = sorted(less_than_max_value, key=lambda x: x[3])
+
   res = {
     "all_rmsd_values": rmsd_values,
     "less_than_max_value": less_than_max_value,
