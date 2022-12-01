@@ -171,6 +171,10 @@ def rmsd_of_distances(mol1: Atoms, mol2: Atoms) -> float:
   return np.sqrt(np.mean((d1 - d2)**2))
 
 
+def rmsd_of_positions(mol1: Atoms, mol2: Atoms) -> float:
+  return np.sqrt(np.mean((mol1.positions - mol2.positions)**2))
+
+
 def try_get_info_item_from_atoms(mol: Atoms, info_key: str) -> str:
   try:
     if info_key in mol.info:
@@ -206,8 +210,5 @@ def write_ase_atoms_to_xyz_file(
 
   return ut.write_text_file_from_lines(file_path=output_path, lines=res)
 
-
-def rmsd_of_positions(mol1: Atoms, mol2: Atoms) -> float:
-  return np.sqrt(np.mean((mol1.positions - mol2.positions)**2))
 
 
