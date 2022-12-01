@@ -11,18 +11,6 @@ import utils as ut
 import constants as C
 
 
-def write_xyz_file_from_dict(
-                              output_path: Union[str, Path],
-                              xyz_as_list_of_dicts: List[Dict]
-                            ) -> int:
-  '''
-    Writes xyz dictionary into text file.
-    Reverse function to 'read_xyz_file(...)'
-  '''
-
-  pass
-
-
 def convert_xyz_coords_to_str(
                                 element: str,
                                 x: float,
@@ -115,6 +103,38 @@ def read_xyz_file(
   return res
 
 
+def read_xyz_many_files(
+                  list_of_input_path_and_idx_tuples: List[Tuple[Union[str, Path], Union[int, List[int]]]],
+                  convert_coords_to_float: bool=False,
+                  ) -> List[Dict]:
+  '''
+    Reads input xyz files and aggregates them into one xyz file.
+    If idx is specified, then takes only xyz block with that index,
+    file contains more than 1 xyz blocks, eg optimization trajectory file,
+    or conformers file.
+
+  ''' 
+  res = []
+  for p, idx in list_of_input_path_and_idx_tuples:
+    xyz_file_data = read_xyz_file(
+                      input_path=p,
+                      convert_coords_to_float=convert_coords_to_float
+                      )
+
+    num_xyz_blocks = len(xyz_file_data)
+
+    if isinstance(idx, int) and abs(idx) < num_xyz_blocks:
+      res.append(xyz_file_data[idx])
+    elif isinstance(idx, list) or isinstance(idx, tuple):
+      for i in idx:
+        if isinstance(i, int) and abs(i) < num_xyz_blocks:
+          res.append(xyz_file_data[i])
+    else:
+      res.extend(xyz_file_data)
+
+  return res
+
+
 def split_xyz_lines_elements_coords_from_str(xyz_lines: List[str]) -> Dict:
 
   element_and_coords = [convert_xyz_str_to_coords(x) for x in xyz_lines]
@@ -136,3 +156,22 @@ def split_xyz_lines_elements_coords_from_tuple(xyz_lines: List[Tuple[str, List[f
           "coords": coords
         }
 
+
+def write_xyz_file_from_dict(
+                              output_path: Union[str, Path],
+                              xyz_as_list_of_dicts: List[Dict]
+                            ) -> int:
+  '''
+    Writes xyz dictionary into text file.
+    Reverse function to 'read_xyz_file(...)'
+  '''
+  res = []
+  for xyz_dict in xyz_as_list_of_dicts:
+    res.append(xyz_dict["num_atoms"])
+    res.append(xyz_dict["description"])
+    res.extend(xyz_dict["xyz_lines"])
+
+  return ut.write_text_file_from_lines(
+          file_path=output_path,
+          lines=res
+        )
