@@ -167,3 +167,47 @@ def write_ase_atoms_to_xyz_file(
     res.extend(lines)
 
   return ut.write_text_file_from_lines(file_path=output_path, lines=res)
+
+
+def rmsd_of_positions(mol1: Atoms, mol2: Atoms) -> float:
+  return np.sqrt(np.mean((mol1.positions - mol2.positions)**2))
+
+
+def aligned_rmsd(target: Atoms, mol: Atoms) -> float:
+  aligned_mol = align_2_molecules_min_rmsd(
+                                            target=target,
+                                            atoms_to_align=mol
+                                          )
+
+  return rmsd_of_positions(
+                            mol1=target,
+                            mol2=aligned_mol
+                          )
+
+
+def aligned_rmsd_one_to_many(target: Atoms, mols: List[Atoms]) -> List[float]:
+  return [aligned_rmsd(target=target, mol=m) for m in mols]
+
+
+def aligned_rmsd_many_to_many(targets: List[Atoms], mols: List[Atoms]) -> List[List[float]]:
+  return [aligned_rmsd_one_to_many(target=t, mols=mols) for t in targets]
+
+
+def aligned_rmsd_xyz_files(target_mols_path: Path, mols_path: Path) -> List[List[float]]:
+
+  target_mols = create_ase_atoms_list_from_xyz_file(
+                                                    input_path=target_mols_path,
+                                                    name=target_mols_path.stem
+                                                  )
+
+  mols = create_ase_atoms_list_from_xyz_file(
+                                              input_path=mols_path,
+                                              name=mols_path.stem
+                                            )
+
+  return aligned_rmsd_many_to_many(
+                                            targets=target_mols,
+                                            mols=mols
+                                          )
+
+
