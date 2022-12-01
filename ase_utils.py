@@ -62,6 +62,32 @@ def aligned_rmsd_xyz_files(target_mols_path: Path, mols_path: Path) -> List[List
                                           )
 
 
+def calculate_rmsd_between_xyz_files(
+                                      target_xyz_path: Path,
+                                      xyz_path: Path,
+                                      max_value: float,
+                                    ) -> Dict:
+
+  rmsd_values = aligned_rmsd_xyz_files(
+                      target_mols_path=target_xyz_path,
+                      mols_path=xyz_path
+                    )
+
+  less_than_max_value = []
+  for i, vals_i in enumerate(rmsd_values):
+    for j, vals_j in enumerate(vals_i):
+      rmsd_val = rmsd_values[i][j]
+      if i != j and rmsd_val < max_value:
+        less_than_max_value.append(("target_source_rmsd", i, j, rmsd_val))
+
+  res = {
+    "all_rmsd_values": rmsd_values,
+    "less_than_max_value": less_than_max_value,
+  }
+
+  return res
+
+
 def create_ase_atoms(
                       atomic_nrs: List[int],
                       coords: List[List[float]],
@@ -209,6 +235,5 @@ def write_ase_atoms_to_xyz_file(
     res.extend(lines)
 
   return ut.write_text_file_from_lines(file_path=output_path, lines=res)
-
 
 
