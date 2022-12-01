@@ -462,17 +462,28 @@ def process_many_log_files(
 
   # try sort ascending by final energy
   energy_diff = 0
+  rank_list = []
   try:
     res.sort(key= lambda x: x["results"]["scf_summary"]["energy_end"])
     best_energy = res[0]["results"]["scf_summary"]["energy_end"]
     worst_energy = res[-1]["results"]["scf_summary"]["energy_end"]
+    for dct in res:
+      energy_diff_to_best = dct["results"]["scf_summary"]["energy_end"] - best_energy
+      inp_path = Path(dct["input_path"])
+      file_name = inp_path.name
+      name = file_name if len(file_name) > 10 else f"{inp_path.parent.name}_{file_name}"
+      energy_diff_str = f"{round(energy_diff_to_best * C.hartree_in_kcal_per_mol, 2)} kcal/mol, {round(energy_diff_to_best * C.hartree_in_kJ_per_mol, 2)} kJ/mol"
+      rank_list.append(f"energy diff to best: {energy_diff_str}, source: {name}")
+      dct["results"]["scf_summary"]["energy_diff_to_best"] = energy_diff_str
     energy_diff = round((best_energy - worst_energy) * C.hartree_in_kcal_per_mol, 2)
   except:
     pass
 
+
   summary = {
     "num_experiments": len(res),
-    "energy_diff_best_worst_kcal_per_mol": energy_diff
+    "energy_diff_best_worst_kcal_per_mol": energy_diff,
+    "ranking" : rank_list,
   }
 
   res.insert(0, summary)
