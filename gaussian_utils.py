@@ -189,7 +189,7 @@ def extract_optimization_steps_as_xyz(
   for i in range(num_steps):
     start_line = xyz_block_lines[i]
     end_line = xyz_block_lines[i + 1] if i < num_steps - 1 else len(lines)
-    description = f"opt step {i + 1} of {num_steps}"
+    description = f"opt step {i + 1} of {num_steps}, source: {file_path.name}"
     xyz = extract_opt_step_as_xyz_lines(
                                         lines=lines,
                                         between_lines=(start_line, end_line),
@@ -461,7 +461,8 @@ def process_many_log_files(
                             output_dir: Union[str, Path]=None,
                             aggregate_log_file_name: str="aggregate.log",
                             extract_summary_step_nr: int=0,
-                            do_only_summary: bool=False
+                            do_only_summary: bool=False,
+                            write_last_opt_steps_file_path: Path=None
                             ):
 
   res = [process_one_log_file(
@@ -470,6 +471,9 @@ def process_many_log_files(
             extract_summary_step_nr=extract_summary_step_nr,
             do_only_summary=do_only_summary
           ) for x in input_paths]
+
+  summary = {}
+  errors = []
 
   # try sort ascending by final energy
   diff_best_worst_str = ""
@@ -488,14 +492,32 @@ def process_many_log_files(
       energy_diff_str = f"{round(energy_diff_to_best,6)} a.u., {round(energy_diff_to_best * C.hartree_in_kcal_per_mol, 2)} kcal/mol, {round(energy_diff_to_best * C.hartree_in_kJ_per_mol, 2)} kJ/mol"
       rank_list.append(f"{i + 1}: diff best: {energy_diff_str}, source: {name}")
       dct["results"]["scf_summary"]["energy_diff_to_best"] = energy_diff_str
-  except:
-    pass
+  except Exception as ex:
+    errors.append(str(ex))
 
-  summary = {
-    "num_experiments": len(res),
-    "energy_diff_best_worst": diff_best_worst_str,
-    "ranking" : rank_list,
-  }
+  summary["num_experiments"] = len(res)
+  summary["energy_diff_best_worst"] = diff_best_worst_str
+  summary["ranking"] = rank_list
+
+  if write_last_opt_steps_file_path:
+    try:
+      last_opt_steps_xyz = [extract_optimization_steps_as_xyz(
+                                                    file_path=x,
+                                                    collect_to_single_list=False
+                                                    )[-1] for x in input_paths]
+      #xyz_parser.read_xyz_file()
+      
+      aggregate_xyz_res = ut.write_text_file_from_lines(
+            file_path=write_last_opt_steps_file_path,
+            lines=ut.flatten_list(last_opt_steps_xyz)
+          )
+      summary["last_opt_steps_file"] = aggregate_xyz_res
+
+    except Exception as ex:
+      errors.append(str(ex))
+
+  if len(errors) > 0:
+    summary["error"] = errors
 
   res.insert(0, summary)
 
