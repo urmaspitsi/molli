@@ -74,10 +74,12 @@ def calculate_rmsd_between_xyz_files(
                     )
 
   less_than_max_value = []
+  is_same_file = True if target_xyz_path == xyz_path else False
   for i, vals_i in enumerate(rmsd_values):
-    for j, vals_j in enumerate(vals_i):
+    j_start = i + 1 if is_same_file else 0
+    for j in range(j_start, len(vals_i)):
       rmsd_val = rmsd_values[i][j]
-      if i != j and rmsd_val < max_value:
+      if rmsd_val < max_value:
         less_than_max_value.append(("target_source_rmsd", i, j, rmsd_val))
 
   less_than_max_value = sorted(less_than_max_value, key=lambda x: x[3])
@@ -87,6 +89,27 @@ def calculate_rmsd_between_xyz_files(
     "less_than_max_value": less_than_max_value,
   }
 
+  return res
+
+
+def calculate_rmsd_xyz_file(
+                              xyz_path: Path,
+                              max_value: float,
+                            ) -> Dict:
+
+  filtered_rmsd_vals = calculate_rmsd_between_xyz_files(
+      target_xyz_path=xyz_path,
+      xyz_path=xyz_path,
+      max_value=max_value
+    )["less_than_max_value"]
+
+  keys = set()
+  res = []
+  for name,i,j,rmsd_val in filtered_rmsd_vals:
+    if not ((i,j) in keys or (j,i)) in keys:
+      res.append((name,i,j,rmsd_val))
+      keys.add((i,j))
+ 
   return res
 
 
