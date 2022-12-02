@@ -34,6 +34,22 @@ def convert_xyz_coords_to_str(
   return f"{element}{space_1}{x_str}{space_2}{y_str}{space_3}{z_str}"
 
 
+def convert_xyz_lines_to_dict(
+                              xyz_data: List[str],
+                              convert_coords_to_float: bool=False,
+                            ) -> Dict:
+
+  xyz_lines = [convert_xyz_str_to_coords(x) for x in xyz_data[2:]] \
+              if convert_coords_to_float \
+              else xyz_data[2:]
+
+  return {
+          "num_atoms": xyz_data[0],
+          "description": xyz_data[1],
+          "xyz_lines": xyz_lines
+        }
+
+
 def convert_xyz_str_to_coords(xyz_row: str) -> Tuple:
 
   element, x, y, z = xyz_row.strip().split()[:4]
