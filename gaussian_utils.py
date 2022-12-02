@@ -224,23 +224,24 @@ def extract_scf_summary(
   result_summary_dict["optimization_converged"] = is_converged
 
   # Collect summary at the max_step_nr
+  num_steps_original = len(block_lines)
   if len(block_lines) > 1 and max_step_nr > 0:
     block_lines = block_lines[:max_step_nr]
-
-
+    
   num_steps = len(block_lines)
+  steps_pct = 1 if num_steps_original == num_steps else num_steps / num_steps_original
+
   text_lines = []
   separator_row = "-" * 90
-
+  energy_delta = 9999 # some arbitrary large number, if error
   try:
     energy_start = float(lines[block_lines[0]].split("  ")[2])
     energy_end = float(lines[block_lines[-1]].split("  ")[2])
     energy_delta = energy_end - energy_start
-    energy_delta_kcal_per_mol = round(energy_delta * C.hartree_in_kcal_per_mol, 2)
-    energy_delta = round(energy_delta, 8)
+    energy_delta_str = f"{round(energy_delta, 8)} a.u., {round(energy_delta * C.hartree_in_kcal_per_mol, 2)} kcal/mol, {round(energy_delta * C.hartree_in_kJ_per_mol, 2)} kJ/mol"
 
   except Exception as ex:
-    energy_delta = str(ex)
+    energy_delta_str = str(ex)
 
   try:
     minutes_per_step = 0
@@ -258,16 +259,22 @@ def extract_scf_summary(
                     + int(hours[:-1].strip()) * 60 \
                     + int(minutes[:-1].strip()) \
                     + float(seconds[:-1].strip()) / 60
+
+      total_minutes *= steps_pct # scale total minutes, if partial summary
       minutes_per_step = round(total_minutes / num_steps, 1)
 
-    result_summary_dict["elapsed_time_str"] = elapsed_time
+    elapsed_time_str = elapsed_time \
+                        if steps_pct == 1 \
+                        else f"{elapsed_time} (time for {num_steps_original} steps)"
+
+    result_summary_dict["elapsed_time_str"] = elapsed_time_str
     result_summary_dict["elapsed_time_minutes"] = round(total_minutes, 1)
     result_summary_dict["num_steps"] = num_steps
     result_summary_dict["minutes_per_step"] = minutes_per_step
     result_summary_dict["energy_start"] = energy_start
     result_summary_dict["energy_end"] = energy_end
     result_summary_dict["energy_delta"] = energy_delta
-    result_summary_dict["energy_delta_kcal_per_mol"] = energy_delta_kcal_per_mol
+    result_summary_dict["energy_delta_text"] = energy_delta_str
 
     #energy_delta = str(energy_delta).rstrip()
     #energy_delta_kcal_per_mol = str(energy_delta_kcal_per_mol).rstrip()
@@ -276,7 +283,7 @@ def extract_scf_summary(
     elapsed_time = str(ex)
     result_summary_dict["error"] = str(ex)
 
-  scf_data = [separator_row, f"SCF: change in energy = {energy_delta}({energy_delta_kcal_per_mol} kcal/mol)   {elapsed_time}   {minutes_per_step} min/step", separator_row] \
+  scf_data = [separator_row, f"SCF: change in energy = {energy_delta_str}  {elapsed_time_str}  {minutes_per_step} min/step", separator_row] \
     + [f"{i + 1}:" + " " * (4 - len(str(i + 1))) + lines[x].replace("\n", "") for i,x in enumerate(block_lines)] \
     + ["\n"]
 
@@ -359,7 +366,6 @@ def write_scf_summary_from_gaussian_logfile(
                                 )
 
     res = summary["summary"]
-    res["write_result"] = write_result
     return res
 
   except Exception as ex:
@@ -435,6 +441,8 @@ def process_one_log_file(
                                     output_path=output_path_scf,
                                     max_step_nr=extract_summary_step_nr
                                     )
+  task_results["scf_summary_file"] = output_path_scf.name
+
 
   res = {
       "input_path": str(input_path),
@@ -461,28 +469,28 @@ def process_many_log_files(
           ) for x in input_paths]
 
   # try sort ascending by final energy
-  energy_diff = 0
+  diff_best_worst_str = ""
   rank_list = []
   try:
     res.sort(key= lambda x: x["results"]["scf_summary"]["energy_end"])
     best_energy = res[0]["results"]["scf_summary"]["energy_end"]
     worst_energy = res[-1]["results"]["scf_summary"]["energy_end"]
+    diff_best_worst = best_energy - worst_energy
+    diff_best_worst_str = f"{round(diff_best_worst,6)} a.u., {round(diff_best_worst * C.hartree_in_kcal_per_mol, 2)} kcal/mol, {round(diff_best_worst * C.hartree_in_kJ_per_mol, 2)} kJ/mol"
     for dct in res:
       energy_diff_to_best = dct["results"]["scf_summary"]["energy_end"] - best_energy
       inp_path = Path(dct["input_path"])
       file_name = inp_path.name
       name = file_name if len(file_name) > 10 else f"{inp_path.parent.name}_{file_name}"
-      energy_diff_str = f"{round(energy_diff_to_best * C.hartree_in_kcal_per_mol, 2)} kcal/mol, {round(energy_diff_to_best * C.hartree_in_kJ_per_mol, 2)} kJ/mol"
+      energy_diff_str = f"{round(energy_diff_to_best,6)} a.u., {round(energy_diff_to_best * C.hartree_in_kcal_per_mol, 2)} kcal/mol, {round(energy_diff_to_best * C.hartree_in_kJ_per_mol, 2)} kJ/mol"
       rank_list.append(f"energy diff to best: {energy_diff_str}, source: {name}")
       dct["results"]["scf_summary"]["energy_diff_to_best"] = energy_diff_str
-    energy_diff = round((best_energy - worst_energy) * C.hartree_in_kcal_per_mol, 2)
   except:
     pass
 
-
   summary = {
     "num_experiments": len(res),
-    "energy_diff_best_worst_kcal_per_mol": energy_diff,
+    "energy_diff_best_worst": diff_best_worst_str,
     "ranking" : rank_list,
   }
 
