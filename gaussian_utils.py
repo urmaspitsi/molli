@@ -365,7 +365,12 @@ def write_scf_summary_from_gaussian_logfile(
                                   lines=summary["text_lines"]
                                 )
 
-    res = summary["summary"]
+    first_part = {
+      "scf_summary_file": Path(output_path).name,
+      }
+
+    last_part = summary["summary"]
+    res = {**first_part, **last_part}
     return res
 
   except Exception as ex:
@@ -441,8 +446,6 @@ def process_one_log_file(
                                     output_path=output_path_scf,
                                     max_step_nr=extract_summary_step_nr
                                     )
-  task_results["scf_summary_file"] = output_path_scf.name
-
 
   res = {
       "input_path": str(input_path),
