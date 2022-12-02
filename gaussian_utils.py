@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
+import ase_utils as au
 import constants as C
 import utils as ut
 import xyz_parser
@@ -505,12 +506,28 @@ def process_many_log_files(
                                                     file_path=x,
                                                     collect_to_single_list=False
                                                     )[-1] for x in input_paths]
-      #xyz_parser.read_xyz_file()
-      
-      aggregate_xyz_res = ut.write_text_file_from_lines(
-            file_path=write_last_opt_steps_file_path,
-            lines=ut.flatten_list(last_opt_steps_xyz)
-          )
+
+      # aggregate_xyz_res = ut.write_text_file_from_lines(
+      #       file_path=write_last_opt_steps_file_path,
+      #       lines=ut.flatten_list(last_opt_steps_xyz)
+      #     )
+
+      dicts = [xyz_parser.convert_xyz_lines_to_dict(x, convert_coords_to_float=True) for x in last_opt_steps_xyz]
+
+      mols = [au.create_ase_atoms_from_xyz_data(xyz_data=xyz_data) for xyz_data in dicts]
+
+      aligned_mols = [
+          au.align_2_molecules_min_rmsd(
+                                      target=mols[0],
+                                      atoms_to_align=x
+                                    ) for x in mols
+        ]
+
+      aggregate_xyz_res = au.write_ase_atoms_to_xyz_file(
+                atoms_list=aligned_mols,
+                output_path=write_last_opt_steps_file_path
+              )
+
       summary["last_opt_steps_file"] = aggregate_xyz_res
 
     except Exception as ex:
