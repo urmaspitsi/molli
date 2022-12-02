@@ -65,41 +65,122 @@ gaussian_job_files = GU.create_gaussian_job_files_from_xyz_steps(
 # pbe1pbe_sto3g
 
 log_files_dirs = [
-    Path("C:/tmp/gaussian/jobs/mol24_BP86_Def2SVPP_SVPFit_results"),
-    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex0a_s1_BP86_Def2SVPP_SVPFit_results"),
-    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex16_BP86_Def2SVPP_SVPFit_results"),
+    # Path("C:/tmp/gaussian/jobs/mol24_BP86_Def2SVPP_SVPFit_results"),
+    # Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex0a_s1_BP86_Def2SVPP_SVPFit_results"),
+    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex15_BP86_Def2SVPP_SVPFit_results"),
 
-    # Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex16_crest3_BP86_Def2SVPP_SVPFit_results"),
-    # Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex16_crest5_BP86_Def2SVPP_SVPFit_results"),
     # Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex19_crest23_BP86_Def2SVPP_SVPFit_results"),
+    #Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex0a_BP86_STO3G_results"),
 
     #Path("C:/tmp/gaussian/jobs_juhan/jobs_juhan_results"),
   ]
 
 gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
 
-output_dir = Path("C:/tmp/gaussian/conformers/mol24_conformers_BP86_Def2SVPP_SVPFit")
+#output_dir = Path("C:/tmp/gaussian/conformers/mol24_conformers_BP86_Def2SVPP_SVPFit")
 #output_dir = Path("C:/tmp/gaussian/jobs_juhan/jobs_juhan_logs")
 #output_dir = Path("C:/tmp/gaussian/jobs/mol24_BP86_Def2SVPP_SVPFit_logs")
-#output_dir = "C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex16_BP86_Def2SVPP_SVPFit_logs"
+output_dir = "C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex15_BP86_Def2SVPP_SVPFit_logs"
 #output_dir = "C:/tmp/gaussian/jobs_logs_bp86_def2svpp_svpfit"
 #output_dir = "C:/tmp/gaussian/jobs_logs_pbe1pbe_def2svpp_svpfit"
 #output_dir = log_files_dirs[0]
 
 #aggregate_log_file_name = "aggregate_log.txt"
-aggregate_log_file_name = "mol24_bp86_def2svpp_svpfit_log.txt"
+#aggregate_log_file_name = "mol24_bp86_def2svpp_svpfit_log.txt"
 #aggregate_log_file_name = "mol24_ex16_bp86_def2svpp_svpfit_log.txt"
 #aggregate_log_file_name = "mol24_pbe1pbe_cc_pvtz_tzvpfit_log.txt"
-#aggregate_log_file_name = "ex15_bp86_sto3g_step10_log.txt"
-#aggregate_log_file_name = "mol24_pbe1pbe_def2svpp_svpfit_log.txt"
+#aggregate_log_file_name = "mol24_ex0a_bp86_sto3g_log.txt"
+aggregate_log_file_name = "mol24_ex15_16_bp86_def2svpp_svpfit_log.txt"
 
 GU.process_many_log_files(
                           input_paths=gaussian_log_files,
                           output_dir=output_dir,
                           aggregate_log_file_name=aggregate_log_file_name,
 #                          extract_summary_step_nr=10,
-#                          do_only_summary=True
+                          do_only_summary=True
                           )
+
+
+#%%
+############################################################################
+# Process Gaussian log files: log files as a list of full paths.
+# BP86/STO-3G 10 steps
+############################################################################
+
+log_files_dirs = [
+    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex0a_BP86_STO3G_results"),
+    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex0b_BP86_STO3G_results"),
+    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex15_BP86_STO3G_results"), 
+    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex19_BP86_STO3G_results"),
+    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex21_BP86_STO3G_results"),
+    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex23_BP86_STO3G_results"),
+
+  ]
+
+gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
+
+output_dir = Path("C:/tmp/gaussian/filter1/crest_mol24_BP86_STO3G_25steps")
+aggregate_log_file_name = "mol24_crest_bp86_sto3g_25steps_log.txt"
+aggreagate_xyz_file = output_dir.joinpath("mol24_crest_bp86_sto3g_25steps_confs.xyz")
+
+GU.process_many_log_files(
+                          input_paths=gaussian_log_files,
+                          output_dir=output_dir,
+                          aggregate_log_file_name=aggregate_log_file_name,
+                          extract_summary_step_nr=25,
+                          do_only_summary=True,
+                          write_last_opt_steps_file_path=aggreagate_xyz_file
+                          )
+
+
+#%%
+############################################################################
+# Align molecules (conformers)
+############################################################################
+
+import ase_utils as au
+
+input_path = Path("C:/tmp/gaussian/filter1/crest_mol24_BP86_STO3G_25steps/mol24_crest_bp86_sto3g_25steps_confs.xyz")
+output_path=input_path.parent.joinpath(f"{input_path.stem}_aligned.xyz")
+
+# Align conformers and write new file
+au.write_aligned_xyz_file(
+  input_path=input_path,
+  output_path=output_path
+)
+
+
+
+#%%
+############################################################################
+# Process Gaussian log files: log files as a list of full paths.
+# BP86/Def2SVPP/SVPFit 10 steps
+############################################################################
+
+log_files_dirs = [
+    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex0a_BP86_Def2SVPP_SVPFit_results"),
+    #Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex0b_BP86_Def2SVPP_SVPFit_results"),
+    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex15_BP86_Def2SVPP_SVPFit_results"),
+
+  ]
+
+gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
+
+output_dir = Path("C:/tmp/gaussian/filter1/crest_mol24_BP86_Def2SVPP_SVPFit_10steps")
+aggregate_log_file_name = "mol24_crest_bp86_def2svpp_svpfit_10steps_log.txt"
+
+GU.process_many_log_files(
+                          input_paths=gaussian_log_files,
+                          output_dir=output_dir,
+                          aggregate_log_file_name=aggregate_log_file_name,
+                          extract_summary_step_nr=10,
+                          do_only_summary=True
+                          )
+
+
+
+
+
 
 
 #%%
