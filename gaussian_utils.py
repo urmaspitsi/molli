@@ -480,13 +480,13 @@ def process_many_log_files(
     worst_energy = res[-1]["results"]["scf_summary"]["energy_end"]
     diff_best_worst = best_energy - worst_energy
     diff_best_worst_str = f"{round(diff_best_worst,6)} a.u., {round(diff_best_worst * C.hartree_in_kcal_per_mol, 2)} kcal/mol, {round(diff_best_worst * C.hartree_in_kJ_per_mol, 2)} kJ/mol"
-    for dct in res:
+    for i, dct in enumerate(res):
       energy_diff_to_best = dct["results"]["scf_summary"]["energy_end"] - best_energy
       inp_path = Path(dct["input_path"])
       file_name = inp_path.name
       name = file_name if len(file_name) > 10 else f"{inp_path.parent.name}_{file_name}"
       energy_diff_str = f"{round(energy_diff_to_best,6)} a.u., {round(energy_diff_to_best * C.hartree_in_kcal_per_mol, 2)} kcal/mol, {round(energy_diff_to_best * C.hartree_in_kJ_per_mol, 2)} kJ/mol"
-      rank_list.append(f"energy diff to best: {energy_diff_str}, source: {name}")
+      rank_list.append(f"{i + 1}: diff best: {energy_diff_str}, source: {name}")
       dct["results"]["scf_summary"]["energy_diff_to_best"] = energy_diff_str
   except:
     pass
