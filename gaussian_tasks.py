@@ -135,21 +135,20 @@ GU.process_many_log_files(
 
 #%%
 ############################################################################
-# Align molecules (conformers)
+# Find near similars
 ############################################################################
 
 import ase_utils as au
 
 input_path = Path("C:/tmp/gaussian/filter1/crest_mol24_BP86_STO3G_25steps/mol24_crest_bp86_sto3g_25steps_confs.xyz")
-output_path=input_path.parent.joinpath(f"{input_path.stem}_aligned.xyz")
+#input_path = aggreagate_xyz_file
 
-# Align conformers and write new file
-au.write_aligned_xyz_file(
-  input_path=input_path,
-  output_path=output_path
-)
+near_similars = au.calculate_rmsd_xyz_file(
+                            xyz_path=input_path,
+                            max_value=0.3
+                          )
 
-
+near_similars
 
 #%%
 ############################################################################
