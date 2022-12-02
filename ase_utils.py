@@ -224,7 +224,7 @@ def try_get_description_from_atoms(mol: Atoms) -> str:
 def write_ase_atoms_to_xyz_file(
             atoms_list: List[Atoms],
             output_path: Union[str, Path]
-            ) -> None:
+            ) -> str:
 
   res = []
   for mol in atoms_list:
@@ -238,4 +238,26 @@ def write_ase_atoms_to_xyz_file(
 
   return ut.write_text_file_from_lines(file_path=output_path, lines=res)
 
+
+def write_aligned_xyz_file(
+            input_path: Union[str, Path],
+            output_path: Union[str, Path],
+          ):
+
+  mols = create_ase_atoms_list_from_xyz_file(
+                  input_path=input_path,
+                  name=input_path.stem
+                )
+
+  aligned_mols = [
+      align_2_molecules_min_rmsd(
+                                  target=mols[0],
+                                  atoms_to_align=x
+                                ) for x in mols
+    ]
+
+  return write_ase_atoms_to_xyz_file(
+            atoms_list=aligned_mols,
+            output_path=output_path
+          )
 
