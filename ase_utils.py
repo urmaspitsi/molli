@@ -13,7 +13,11 @@ import metrics as ms
 import xyz_parser
 
 
-def align_2_molecules_min_rmsd(target: Atoms, atoms_to_align: Atoms) -> Atoms:
+def align_2_molecules_min_rmsd(
+                                target: Atoms,
+                                atoms_to_align: Atoms,
+                              ) -> Atoms:
+
   '''
     Aligns atoms_to_align with target, based on min rmsd.
     Returns copy of atoms_to_align with new position coordinates.
@@ -25,11 +29,16 @@ def align_2_molecules_min_rmsd(target: Atoms, atoms_to_align: Atoms) -> Atoms:
   return res
 
 
-def aligned_rmsd(target: Atoms, mol: Atoms) -> float:
+def calculate_rmsd(
+                    target: Atoms,
+                    mol: Atoms,
+                    align: bool
+                  ) -> float:
+
   aligned_mol = align_2_molecules_min_rmsd(
                                             target=target,
                                             atoms_to_align=mol
-                                          )
+                                          ) if align else mol
 
   return ms.rmsd_of_positions(
                             mol1=target,
@@ -37,15 +46,29 @@ def aligned_rmsd(target: Atoms, mol: Atoms) -> float:
                           )
 
 
-def aligned_rmsd_one_to_many(target: Atoms, mols: List[Atoms]) -> List[float]:
-  return [aligned_rmsd(target=target, mol=m) for m in mols]
+def calculate_rmsd_one_to_many(
+                                target: Atoms,
+                                mols: List[Atoms],
+                                align: bool
+                              ) -> List[float]:
+
+  return [calculate_rmsd(target=target, mol=m, align=align) for m in mols]
 
 
-def aligned_rmsd_many_to_many(targets: List[Atoms], mols: List[Atoms]) -> List[List[float]]:
-  return [aligned_rmsd_one_to_many(target=t, mols=mols) for t in targets]
+def calculate_rmsd_many_to_many(
+                                  targets: List[Atoms],
+                                  mols: List[Atoms],
+                                  align: bool
+                                ) -> List[List[float]]:
+
+  return [calculate_rmsd_one_to_many(target=t, mols=mols, align=align) for t in targets]
 
 
-def aligned_rmsd_xyz_files(target_mols_path: Path, mols_path: Path) -> List[List[float]]:
+def calculate_rmsd_xyz_files(
+                              target_mols_path: Path,
+                              mols_path: Path,
+                              align: bool
+                            ) -> List[List[float]]:
 
   target_mols = create_ase_atoms_list_from_xyz_file(
                                                     input_path=target_mols_path,
@@ -57,9 +80,10 @@ def aligned_rmsd_xyz_files(target_mols_path: Path, mols_path: Path) -> List[List
                                               name=mols_path.stem
                                             )
 
-  return aligned_rmsd_many_to_many(
+  return calculate_rmsd_many_to_many(
                                     targets=target_mols,
-                                    mols=mols
+                                    mols=mols,
+                                    align=align
                                   )
 
 
@@ -67,11 +91,13 @@ def calculate_rmsd_between_xyz_files(
                                       target_xyz_path: Path,
                                       xyz_path: Path,
                                       max_value: float,
+                                      align: bool
                                     ) -> Dict:
 
-  rmsd_values = aligned_rmsd_xyz_files(
+  rmsd_values = calculate_rmsd_xyz_files(
                       target_mols_path=target_xyz_path,
-                      mols_path=xyz_path
+                      mols_path=xyz_path,
+                      align=align
                     )
 
   less_than_max_value = []
@@ -96,12 +122,14 @@ def calculate_rmsd_between_xyz_files(
 def calculate_rmsd_xyz_file(
                               xyz_path: Path,
                               max_value: float,
+                              align: bool
                             ) -> Dict:
 
   filtered_rmsd_vals = calculate_rmsd_between_xyz_files(
       target_xyz_path=xyz_path,
       xyz_path=xyz_path,
-      max_value=max_value
+      max_value=max_value,
+      align=align
     )["less_than_max_value"]
 
   keys = set()
