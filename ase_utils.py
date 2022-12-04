@@ -9,6 +9,7 @@ from ase.build import minimize_rotation_and_translation
 import constants as C
 from dataset import Dataset
 import utils as ut
+import metrics as ms
 import xyz_parser
 
 
@@ -30,7 +31,7 @@ def aligned_rmsd(target: Atoms, mol: Atoms) -> float:
                                             atoms_to_align=mol
                                           )
 
-  return rmsd_of_positions(
+  return ms.rmsd_of_positions(
                             mol1=target,
                             mol2=aligned_mol
                           )
@@ -57,9 +58,9 @@ def aligned_rmsd_xyz_files(target_mols_path: Path, mols_path: Path) -> List[List
                                             )
 
   return aligned_rmsd_many_to_many(
-                                            targets=target_mols,
-                                            mols=mols
-                                          )
+                                    targets=target_mols,
+                                    mols=mols
+                                  )
 
 
 def calculate_rmsd_between_xyz_files(
@@ -214,16 +215,6 @@ def compare_if_molecules_are_equal(mol1: Atoms, mol2: Atoms) -> bool:
               atol=1e-08,
               equal_nan=True
             )
-
-
-def rmsd_of_distances(mol1: Atoms, mol2: Atoms) -> float:
-  d1 = mol1.get_all_distances()
-  d2 = mol2.get_all_distances()
-  return np.sqrt(np.mean((d1 - d2)**2))
-
-
-def rmsd_of_positions(mol1: Atoms, mol2: Atoms) -> float:
-  return np.sqrt(np.mean((mol1.positions - mol2.positions)**2))
 
 
 def try_get_info_item_from_atoms(mol: Atoms, info_key: str) -> str:
