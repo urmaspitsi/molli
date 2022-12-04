@@ -282,7 +282,7 @@ def extract_mols_from_xyz_files(
               input_list=create_ase_atoms_list_from_xyz_file(
                     input_path=src.file_path,
                     name=src.name),
-              idxs=src.item_idx)
+              idxs=src.item_idxs)
           for src in sources]
 
   return res
