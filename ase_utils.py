@@ -1,6 +1,6 @@
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Callable, Dict, List, Tuple, Union
 import numpy as np
 
 from ase import Atoms
@@ -27,6 +27,34 @@ def align_2_molecules_min_rmsd(
   minimize_rotation_and_translation(target, res)
 
   return res
+
+
+def calculate_metric_between_two_molecules(
+                    target: Atoms,
+                    mol: Atoms,
+                    align: bool,
+                    metric_function: Callable,
+                  ) -> float:
+  '''
+    Applies metric_function on target and mol:
+      metric_function(mol1=target, mol2=mol) -> float
+    metric_function must:
+      take 2 input parameters: mol1: Atoms, mol2: Atoms
+      and return float.
+    
+    align: True/False, whether to align target and mol before metric calculation.
+    alignment is done by align_2_molecules_min_rmsd()
+  '''
+
+  aligned_mol = align_2_molecules_min_rmsd(
+                                            target=target,
+                                            atoms_to_align=mol
+                                          ) if align else mol
+
+  return metric_function(
+                          mol1=target,
+                          mol2=aligned_mol
+                        )
 
 
 def calculate_rmsd(
