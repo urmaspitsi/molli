@@ -8,6 +8,7 @@ from ase.build import minimize_rotation_and_translation
 
 import constants as C
 from dataset import Dataset
+from file_source import MultiItemFileSource
 import utils as ut
 import metrics as ms
 import xyz_parser
@@ -274,15 +275,15 @@ def compare_if_molecules_are_equal(mol1: Atoms, mol2: Atoms) -> bool:
 
 
 def extract_mols_from_xyz_files(
-      list_of_tuples_of_path_name_idxs: List[Tuple[Path, str, List[int]]]
+      sources: List[MultiItemFileSource]
     ) -> List[List[Atoms]]:
 
   res = [ut.get_list_slice_by_idxs(
               input_list=create_ase_atoms_list_from_xyz_file(
-                    input_path=file_path,
-                    name=name),
-              idxs=idxs)
-          for file_path, name, idxs in list_of_tuples_of_path_name_idxs]
+                    input_path=src.file_path,
+                    name=src.name),
+              idxs=src.item_idx)
+          for src in sources]
 
   return res
 
