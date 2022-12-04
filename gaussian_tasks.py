@@ -3,8 +3,11 @@
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
+import ase_utils as au
 import gaussian_utils as GU
+import metrics as ms
 import utils as ut
+
 
 #%%
 ############################################################################
@@ -74,33 +77,28 @@ gaussian_job_files = GU.create_gaussian_job_files_from_xyz_steps(
 # pbe1pbe_sto3g
 
 log_files_dirs = [
-    # Path("C:/tmp/gaussian/jobs/mol24_BP86_Def2SVPP_SVPFit_results"),
-    # Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex0a_s1_BP86_Def2SVPP_SVPFit_results"),
+    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex16_crest5_PBE1PBE_Def2SVPP_SVPFit_results"),
+    #Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex0a_s1_BP86_Def2SVPP_SVPFit_results"),
     #Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex0b_BP86_STO3G_results"),
-    # Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex19_crest23_BP86_Def2SVPP_SVPFit_results"),
+    #Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex19_crest23_BP86_Def2SVPP_SVPFit_results"),
     #Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex0a_BP86_STO3G_results"),
-    Path("C:/tmp/gaussian/jobs_juhan/jobs_juhan_results"),
   ]
 
 gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
 
 #output_dir = Path("C:/tmp/gaussian/conformers/mol24_conformers_BP86_Def2SVPP_SVPFit")
-output_dir = Path("C:/tmp/gaussian/jobs_juhan/jobs_juhan_logs")
-#output_dir = Path("C:/tmp/gaussian/jobs/mol24_BP86_Def2SVPP_SVPFit_logs")
-#output_dir = Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex0b_BP86_STO3G_logs")
+output_dir = Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex16_crest5_PBE1PBE_Def2SVPP_SVPFit_logs")
 #output_dir = Path("C:/tmp/gaussian/jobs_logs_bp86_def2svpp_svpfit")
 #output_dir = Path("C:/tmp/gaussian/jobs_logs_pbe1pbe_def2svpp_svpfit")
-#output_dir = log_files_dirs[0]
 
 #aggregate_log_file_name = "aggregate_log.txt"
-#aggregate_log_file_name = "mol24_bp86_def2svpp_svpfit_log.txt"
-#aggregate_log_file_name = "mol24_ex16_bp86_def2svpp_svpfit_log.txt"
-aggregate_log_file_name = "mol24_pbe1pbe_cc_pvtz_tzvpfit_log.txt"
+aggregate_log_file_name = "mol24_pbe1pbe_def2svpp_svpfit_log.txt"
 #aggregate_log_file_name = "mol24_ex0a_bp86_sto3g_log.txt"
 #aggregate_log_file_name = "mol24_ex0b_bp86_sto3g_log.txt"
 
 #aggreagate_xyz_file = output_dir.joinpath("mol24_ex0b_crest_bp86_sto3g_25steps_confs.xyz")
-aggreagate_xyz_file = output_dir.joinpath("mol24_pbe1pbe_cc_pvtz_tzvpfit_confs.xyz")
+#aggreagate_xyz_file = output_dir.joinpath("mol24_crest_bp86_def2svpp_svpfit_10steps_confs.xyz")
+aggreagate_xyz_file = None
 
 GU.process_many_log_files(
                           input_paths=gaussian_log_files,
@@ -217,9 +215,6 @@ GU.process_many_log_files(
 # Find near similars
 ############################################################################
 
-import ase_utils as au
-import metrics as ms
-
 #input_path = Path("C:/tmp/gaussian/filter1/crest_mol24_BP86_STO3G_25steps/mol24_crest_bp86_sto3g_25steps_confs.xyz")
 input_path = Path("C:/tmp/gaussian/filter1/crest_mol24_BP86_STO3G_10steps/mol24_crest_bp86_sto3g_10steps_confs.xyz")
 #input_path = aggreagate_xyz_file
@@ -249,4 +244,35 @@ near_similars_mad = au.calculate_metric_between_two_molecules(
 
 near_similars_mad
 
+# %%
+step_idxs = [0,1,2,3,4,5,6,7,8,9]
+
+opt_steps_data = [
+    (Path("C:/tmp/gaussian/jobs_juhan/jobs_juhan_logs/mol24_ex16_crest5_PBE1PBE_cc_pVTZ_TZVPFit_opt_steps.xyz"), "mol24_ex16_c5_pbe1pbe_cc_pvtz_tzvpfit", step_idxs),
+    (Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex15_BP86_STO3G_logs/mol24_ex16_gfn2_bp86_sto3g_crest_5_opt_steps.xyz"), "mol24_ex16_c5_bp86_sto3g", step_idxs),
+    (Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex16_BP86_Def2SVPP_SVPFit_logs/mol24_ex16_gfn2_bp86_def2svpp_svpfit_crest_5_opt_steps.xyz"), "mol24_ex16_c5_bp86_def2svpp_svpfit", step_idxs),
+    (Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex16_crest5_PBE1PBE_Def2SVPP_SVPFit_logs/crest_mol24_ex16_crest5_PBE1PBE_Def2SVPP_SVPFit_results_opt_steps.xyz"), "mol24_ex16_c5_pbe1pbe_def2svpp_svpfit", step_idxs),
+  ]
+
+names = [n for _, n, _ in opt_steps_data]
+
+mols_at_steps = au.extract_mols_from_xyz_files(list_of_tuples_of_path_name_idxs=opt_steps_data)
+
+# %%
+
+rmsd_vals = []
+for i in step_idxs:
+  mols_at_i = [mols[i] for mols in mols_at_steps]
+  rmsds_to_target = au.calculate_rmsd_one_to_many(
+                                                  target=mols_at_i[0],
+                                                  mols=mols_at_i[1:],
+                                                  align=True
+                                                )
+  rmsd_vals.append(rmsds_to_target)
+
+
+# %%
+rmsd_vals[1]
+
+# %%
 # %%
