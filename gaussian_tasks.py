@@ -284,19 +284,33 @@ near_similars_mad = au.calculate_metric_between_two_molecules(
 near_similars_mad
 
 # %%
-step_idxs = [0,1,2,3,4,5,6,7,8,9]
+#step_idxs = [0,1,2,3,4,5,6,7,8,9]
 trajectories_dir = Path("C:/tmp/gaussian/optimization_trajectories/mol24_ex16_crest5")
 
 base_trajectory = MultiItemFileSource(
     file_path=trajectories_dir.joinpath("mol24_ex16_crest5_PBE1PBE_cc_pVTZ_TZVPFit_opt_steps.xyz"),
     name="pbe1pbe_cc_pvtz_tzvpfit",
-    item_idxs=step_idxs
+    item_idxs=[0,1,10,20,30,40,50,60,70,83]
   )
 
 trajectories_to_compare = [
-    MultiItemFileSource(trajectories_dir.joinpath("mol24_ex16_gfn2_bp86_sto3g_crest_5_opt_steps.xyz"), "bp86_sto3g", step_idxs),
-    MultiItemFileSource(trajectories_dir.joinpath("mol24_ex16_gfn2_bp86_def2svpp_svpfit_crest_5_opt_steps.xyz"), "bp86_def2svpp_svpfit", step_idxs),
-    MultiItemFileSource(trajectories_dir.joinpath("crest_mol24_ex16_crest5_PBE1PBE_Def2SVPP_SVPFit_opt_steps.xyz"), "pbe1pbe_def2svpp_svpfit", step_idxs),
+    MultiItemFileSource(
+      file_path=trajectories_dir.joinpath("mol24_ex16_gfn2_bp86_sto3g_crest_5_opt_steps.xyz"),
+      name="bp86_sto3g",
+      item_idxs=[0,1,5,10,12,14,18,20,22,25]
+      ),
+
+    MultiItemFileSource(
+      file_path=trajectories_dir.joinpath("mol24_ex16_gfn2_bp86_def2svpp_svpfit_crest_5_opt_steps.xyz"),
+      name="bp86_def2svpp_svpfit",
+      item_idxs=[0,1,10,20,30,40,50,60,70,90]
+      ),
+
+    MultiItemFileSource(
+      file_path=trajectories_dir.joinpath("crest_mol24_ex16_crest5_PBE1PBE_Def2SVPP_SVPFit_opt_steps.xyz"),
+      name="pbe1pbe_def2svpp_svpfit",
+      item_idxs=[0,1,10,15,20,25,30,35,40,50]
+      ),
   ]
 
 mol24_ex16_crest5_traj_analyzer = TrajectoryAnalyzer(
@@ -309,22 +323,39 @@ mol24_ex16_crest5_traj_analyzer = TrajectoryAnalyzer(
 # %%
 mol24_ex16_crest5_traj_analyzer.calculate_rmsd_to_base()
 
+# %%
+mol24_ex16_crest5_traj_analyzer.calculate_rmsd_to_base_future()
+
 
 # %%
-step_idxs = list(range(30))
 trajectories_dir = Path("C:/tmp/gaussian/optimization_trajectories/mol24_ex19_crest23")
 
 base_trajectory = MultiItemFileSource(
     file_path=trajectories_dir.joinpath("mol24_ex19_crest23_pbe1pbe_cc_pvtz_tzvpfit_opt_steps.xyz"),
     name="pbe1pbe_cc_pvtz_tzvpfit",
-    item_idxs=step_idxs
+    item_idxs=[0,1,10,15,20,25,30,35,40,55]
   )
 
 trajectories_to_compare = [
-#    MultiItemFileSource(trajectories_dir.joinpath("mol24_ex19_gfn2_bp86_sto3g_crest_23_opt_steps.xyz"), "bp86_sto3g", step_idxs),
-    MultiItemFileSource(trajectories_dir.joinpath("crest_mol24_ex19_crest23_bp86_def2svpp_svpfit_opt_steps.xyz"), "bp86_def2svpp_svpfit", step_idxs),
-    MultiItemFileSource(trajectories_dir.joinpath("crest_mol24_ex19_crest23_pbe1pbe_def2svpp_svpfit_opt_steps.xyz"), "pbe1pbe_def2svpp_svpfit", step_idxs),
+    MultiItemFileSource(
+      file_path=trajectories_dir.joinpath("mol24_ex19_gfn2_bp86_sto3g_crest_23_opt_steps.xyz"),
+      name="bp86_sto3g",
+      item_idxs=[0,2,3,4,5,6,7,8,9,10]
+      ),
+
+    MultiItemFileSource(
+      file_path=trajectories_dir.joinpath("crest_mol24_ex19_crest23_bp86_def2svpp_svpfit_opt_steps.xyz"),
+      name="bp86_def2svpp_svpfit",
+      item_idxs=[0,1,5,10,14,17,20,25,30,35]
+      ),
+
+    MultiItemFileSource(
+      file_path=trajectories_dir.joinpath("crest_mol24_ex19_crest23_pbe1pbe_def2svpp_svpfit_opt_steps.xyz"),
+      name="pbe1pbe_def2svpp_svpfit",
+      item_idxs=[0,1,5,10,14,17,20,25,30,33]
+      ),
   ]
+
 
 mol24_ex19_crest23_traj_analyzer = TrajectoryAnalyzer(
     description="mol24_ex19_crest23 optimization trajectories",
@@ -333,8 +364,10 @@ mol24_ex19_crest23_traj_analyzer = TrajectoryAnalyzer(
   )
 
 # %%
-
 mol24_ex19_crest23_traj_analyzer.calculate_rmsd_to_base()
+
+# %%
+mol24_ex19_crest23_traj_analyzer.calculate_rmsd_to_base_future()
 
 
 # %%
