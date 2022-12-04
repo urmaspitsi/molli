@@ -218,8 +218,10 @@ GU.process_many_log_files(
 ############################################################################
 
 import ase_utils as au
+import metrics as ms
 
-input_path = Path("C:/tmp/gaussian/filter1/crest_mol24_BP86_STO3G_25steps/mol24_crest_bp86_sto3g_25steps_confs.xyz")
+#input_path = Path("C:/tmp/gaussian/filter1/crest_mol24_BP86_STO3G_25steps/mol24_crest_bp86_sto3g_25steps_confs.xyz")
+input_path = Path("C:/tmp/gaussian/filter1/crest_mol24_BP86_STO3G_10steps/mol24_crest_bp86_sto3g_10steps_confs.xyz")
 #input_path = aggreagate_xyz_file
 
 near_similars = au.calculate_rmsd_xyz_file(
@@ -231,5 +233,20 @@ near_similars = au.calculate_rmsd_xyz_file(
 near_similars
 
 # %%
+mols = au.create_ase_atoms_list_from_xyz_file(input_path=input_path, name="mol24_crest_bp86_sto3g_10steps_confs")
+
+# %%
+
+m1 = mols[217]
+m2 = mols[246]
+
+near_similars_mad = au.calculate_metric_between_two_molecules(
+                        target=m1,
+                        mol=m2,
+                        align=False,
+                        metric_function=ms.mad_of_positions
+                      )
+
+near_similars_mad
 
 # %%
