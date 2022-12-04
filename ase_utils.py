@@ -217,7 +217,7 @@ def compare_if_molecules_are_equal(mol1: Atoms, mol2: Atoms) -> bool:
             )
 
 
-def try_get_info_item_from_atoms(mol: Atoms, info_key: str) -> str:
+def get_info_item_from_atoms(mol: Atoms, info_key: str) -> str:
   try:
     if info_key in mol.info:
       return mol.info[info_key]
@@ -227,12 +227,12 @@ def try_get_info_item_from_atoms(mol: Atoms, info_key: str) -> str:
     return ""
 
 
-def try_get_name_from_atoms(mol: Atoms) -> str:
-  return try_get_info_item_from_atoms(mol, info_key="name")
+def get_name_from_atoms(mol: Atoms) -> str:
+  return get_info_item_from_atoms(mol, info_key="name")
 
 
-def try_get_description_from_atoms(mol: Atoms) -> str:
-  return try_get_info_item_from_atoms(mol, info_key="description")
+def get_description_from_atoms(mol: Atoms) -> str:
+  return get_info_item_from_atoms(mol, info_key="description")
 
 
 def write_ase_atoms_to_xyz_file(
@@ -242,7 +242,7 @@ def write_ase_atoms_to_xyz_file(
 
   res = []
   for mol in atoms_list:
-    description = f"{try_get_name_from_atoms(mol)} {try_get_description_from_atoms(mol)}"
+    description = f"{get_name_from_atoms(mol)} {get_description_from_atoms(mol)}"
     lines = [xyz_parser.convert_xyz_coords_to_str(el, x, y, z) \
               for el, (x,y,z) in zip(mol.get_chemical_symbols(), list(mol.positions))]
 
