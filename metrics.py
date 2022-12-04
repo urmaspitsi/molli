@@ -4,7 +4,21 @@ import numpy as np
 
 from ase import Atoms
 
-import utils as ut
+
+def mad_of_positions(mol1: Atoms, mol2: Atoms) -> float:
+  '''
+    Mean Absolute Distance between position coordinates.
+  '''
+  return np.mean(np.abs(mol1.positions - mol2.positions))
+
+
+def mad_of_distances(mol1: Atoms, mol2: Atoms) -> float:
+  '''
+    Mean Absolute Difference across all inter-atomic distances.
+  '''
+  d1 = mol1.get_all_distances()
+  d2 = mol2.get_all_distances()
+  return np.mean(np.abs(d1 - d2))
 
 
 def rmsd_of_distances(mol1: Atoms, mol2: Atoms) -> float:
@@ -14,5 +28,9 @@ def rmsd_of_distances(mol1: Atoms, mol2: Atoms) -> float:
 
 
 def rmsd_of_positions(mol1: Atoms, mol2: Atoms) -> float:
+  '''
+    Root Mean Squared Distance:
+    Square root of the Average of Squared Distances between position coordinates.
+  '''
   return np.sqrt(np.mean((mol1.positions - mol2.positions)**2))
 
