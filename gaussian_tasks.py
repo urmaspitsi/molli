@@ -148,16 +148,17 @@ log_files_dirs = [
     Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex23_BP86_STO3G_results"),
   ]
 
+num_steps = 10
 gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
-output_dir = Path("C:/tmp/gaussian/filter1/crest_mol24_BP86_STO3G_25steps")
-aggregate_log_file_name = "mol24_crest_bp86_sto3g_25steps_log.txt"
-aggreagate_xyz_file = output_dir.joinpath("mol24_crest_bp86_sto3g_25steps_confs.xyz")
+output_dir = Path(f"C:/tmp/gaussian/filter1/crest_mol24_BP86_STO3G_{num_steps}steps")
+aggregate_log_file_name = f"mol24_crest_bp86_sto3g_{num_steps}steps_log.txt"
+aggreagate_xyz_file = output_dir.joinpath(f"mol24_crest_bp86_sto3g_{num_steps}steps_confs.xyz")
 
 GU.process_many_log_files(
                           input_paths=gaussian_log_files,
                           output_dir=output_dir,
                           aggregate_log_file_name=aggregate_log_file_name,
-                          extract_summary_step_nr=25,
+                          extract_summary_step_nr=num_steps,
                           do_only_summary=True,
                           write_last_opt_steps_file_path=aggreagate_xyz_file
                           )
