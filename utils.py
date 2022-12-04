@@ -54,6 +54,11 @@ def get_file_paths_in_many_dirs(
     )
 
 
+def get_list_slice_by_idxs(input_list: List[Any], idxs: List[int]) -> List[Any]:
+  input_length = len(input_list)
+  return [input_list[i] for i in idxs if abs(i) < input_length]
+
+
 def is_within_tolerance(value1: float, value2: float, tolerance: float) -> bool:
   return abs(value1 - value2) < tolerance
 
