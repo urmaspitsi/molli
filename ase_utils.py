@@ -250,7 +250,7 @@ def create_ase_atoms_list_from_xyz_file(
   # list of integers between 0 and len(parsed_xyz_data)
   if item_idxs:
     if isinstance(item_idxs, int) and item_idxs > 1:
-      idxs = ut.linspace_idx(start_idx=0, end_idx=(len(parsed_xyz_data) - 1), num_items=item_idxs)
+      idxs = ut.linspace_idxs(start_idx=0, end_idx=(len(parsed_xyz_data) - 1), num_items=item_idxs)
     elif isinstance(item_idxs, list) and len(item_idxs) > 0:
       idxs = item_idxs
 
