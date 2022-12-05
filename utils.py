@@ -1,9 +1,6 @@
-import copy
-from datetime import datetime
 from itertools import chain
 import json
 import numpy as np
-import os
 from pathlib import Path
 import shutil
 from typing import Any, Dict, List, Tuple, Union
@@ -35,6 +32,14 @@ def flatten_list(list_of_lists: List[List[Any]]) -> List[Any]:
   return list(chain.from_iterable(list_of_lists))
 
 
+def get_block_start_line_nrs(
+                              lines: List[str],
+                              search_text: str,
+                              ) -> List[int]:
+
+  return [i for i,x in enumerate(lines) if search_text in x]
+
+
 def get_file_paths_in_dir(
                           search_dir: Union[str, Path],
                           file_extension: str
@@ -54,6 +59,14 @@ def get_file_paths_in_many_dirs(
     )
 
 
+def get_line_nrs_starts_with_text(
+                              lines: List[str],
+                              search_text: str,
+                              ) -> List[int]:
+
+  return [i for i,x in enumerate(lines) if x.startswith(search_text)]
+
+
 def get_list_slice_by_idxs(input_list: List[Any], idxs: List[int]) -> List[Any]:
   input_length = len(input_list)
   return [input_list[i] for i in idxs if abs(i) < input_length]
@@ -61,6 +74,17 @@ def get_list_slice_by_idxs(input_list: List[Any], idxs: List[int]) -> List[Any]:
 
 def is_within_tolerance(value1: float, value2: float, tolerance: float) -> bool:
   return abs(value1 - value2) < tolerance
+
+
+def linspace_idxs(start_idx: int, end_idx: int, num_items: int) -> List[int]:
+  return list(np.linspace(start_idx, end_idx, num=num_items, dtype=int))
+
+
+def read_text_file_as_lines(file_path: Union[str, Path]) -> List[str]:
+  with open(file_path) as f:
+    lines = f.readlines()
+
+  return lines
 
 
 def to_json_str(data: Any) -> str:
@@ -75,13 +99,6 @@ def write_text_file(file_name: Union[str, Path], text: str) -> str:
 
 def write_text_file_json(file_name: Union[str, Path], data: Any) -> str:
   return write_text_file(file_name, to_json_str(data))
-
-
-def read_text_file_as_lines(file_path: Union[str, Path]) -> List[str]:
-  with open(file_path) as f:
-    lines = f.readlines()
-
-  return lines
 
 
 def write_text_file_from_lines(
@@ -100,19 +117,3 @@ def write_text_file_from_lines(
         f.write("\n")
 
   return str(file_path)
-
-
-def get_block_start_line_nrs(
-                              lines: List[str],
-                              search_text: str,
-                              ) -> List[int]:
-
-  return [i for i,x in enumerate(lines) if search_text in x]
-
-
-def get_line_nrs_starts_with_text(
-                              lines: List[str],
-                              search_text: str,
-                              ) -> List[int]:
-
-  return [i for i,x in enumerate(lines) if x.startswith(search_text)]
