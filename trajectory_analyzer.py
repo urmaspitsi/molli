@@ -48,7 +48,6 @@ class TrajectoryAnalyzer():
 
     return res
 
-
   def calulate_all_metrics(
                         self,
                         metric_funcs: List[Tuple[Callable, str]],
