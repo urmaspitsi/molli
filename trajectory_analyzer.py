@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, NamedTuple, Set, Tuple, Union
 from ase import Atoms
 
 import ase_utils as au
@@ -26,6 +26,69 @@ class TrajectoryAnalyzer():
 
   def get_num_steps(self) -> int:
     return len(self.base_at_steps)
+
+  def calculate_metric_to_base(self, metric_function: Callable) -> List[List[float]]:
+    num_steps = self.get_num_steps()
+    res = []
+    for i in range(num_steps):
+      mols_at_i = [mols[i] for mols in self.mols_to_compare_at_steps]
+      metric_values = au.calculate_metric_one_to_many(
+                                                      target=self.base_at_steps[i],
+                                                      mols=mols_at_i,
+                                                      align=True,
+                                                      metric_function=metric_function
+                                                    )
+      res.append(metric_values)
+  
+    return res
+
+  def calculate_metric_to_base_future(self, metric_function: Callable) -> List[List[float]]:
+    num_steps = self.get_num_steps()
+    res = []
+    for i in range(num_steps):
+      metric_values = [0 for _ in range(len(self))]
+      for traj_idx, mols in enumerate(self.mols_to_compare_at_steps):
+        metric_values[traj_idx] = min([au.calculate_metric_between_two_molecules(
+                                              target=self.base_at_steps[step_idx],
+                                              mol=mols[step_idx],
+                                              align=True,
+                                              metric_function=metric_function
+                                            )
+                                            for step_idx in range(i, num_steps)]
+                                      )
+
+      res.append(metric_values)
+  
+    return res
+
+  def calculate_metric_to_first(
+                                self,
+                                traj_idx: int,
+                                metric_function: Callable
+                              ) -> List[float]:
+
+    mols = self.mols_to_compare_at_steps[traj_idx]
+    res = au.calculate_metric_one_to_many(
+                                        target=mols[0],
+                                        mols=mols,
+                                        align=True,
+                                        metric_function=metric_function
+                                      )  
+    return res
+
+  def calculate_metric_to_first_base(
+                                self,
+                                metric_function: Callable
+                              ) -> List[float]:
+    mols = self.base_at_steps
+    res = au.calculate_metric_one_to_many(
+                                        target=mols[0],
+                                        mols=mols,
+                                        align=True,
+                                        metric_function=metric_function
+                                      )  
+    return res
+
 
   def calculate_rmsd_to_base(self) -> List[List[float]]:
     num_steps = self.get_num_steps()
