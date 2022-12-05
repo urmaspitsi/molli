@@ -58,6 +58,56 @@ def calculate_metric_between_two_molecules(
                         )
 
 
+def calculate_metric_one_to_many(
+                                target: Atoms,
+                                mols: List[Atoms],
+                                align: bool,
+                                metric_function: Callable,
+                              ) -> List[float]:
+  '''
+    Applies metric_function on target and mol:
+      metric_function(mol1=target, mol2=mol) -> float
+    metric_function must:
+      take 2 input parameters: mol1: Atoms, mol2: Atoms
+      and return float.
+    
+    align: True/False, whether to align target and mol before metric calculation.
+    alignment is done by align_2_molecules_min_rmsd()
+  '''
+
+  return [calculate_metric_between_two_molecules(
+                target=target,
+                mol=m,
+                align=align,
+                metric_function=metric_function
+                ) for m in mols]
+
+
+def calculate_metric_many_to_many(
+                                  targets: List[Atoms],
+                                  mols: List[Atoms],
+                                  align: bool,
+                                  metric_function: Callable,
+                                ) -> List[List[float]]:
+  '''
+    Applies metric_function on target and mol:
+      metric_function(mol1=target, mol2=mol) -> float
+    metric_function must:
+      take 2 input parameters: mol1: Atoms, mol2: Atoms
+      and return float.
+    
+    align: True/False, whether to align target and mol before metric calculation.
+    alignment is done by align_2_molecules_min_rmsd()
+  '''
+
+  return [calculate_metric_one_to_many(
+            target=t,
+            mols=mols,
+            align=align,
+            metric_function=metric_function
+            ) for t in targets]
+
+
 def calculate_rmsd(
                     target: Atoms,
                     mol: Atoms,
