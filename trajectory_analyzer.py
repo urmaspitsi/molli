@@ -6,8 +6,10 @@ from ase import Atoms
 import ase_utils as au
 from file_source import MultiItemFileSource
 
+
 @dataclass
 class TrajectoryAnalyzer():
+
   description: str
   base_trajectory: MultiItemFileSource
   trajectories_to_compare: List[MultiItemFileSource] = field(default_factory=list)
@@ -17,20 +19,25 @@ class TrajectoryAnalyzer():
   mols_to_compare_at_steps: List[List[Atoms]] = field(init=False)
   metrics: Dict = field(init=False)
 
+
   def __post_init__(self):
     self.base_at_steps = au.extract_mols_from_xyz_files(sources=[self.base_trajectory])[0]
     self.mols_to_compare_at_steps = au.extract_mols_from_xyz_files(sources=self.trajectories_to_compare)
     if self.metric_functions and len(self.metric_functions) > 0:
       self.metrics = self.calulate_all_metrics(metric_funcs=self.metric_functions)
 
+
   def __getitem__(self, i: int) -> Path:
     return self.trajectories_to_compare[i] if abs(i) < len(self) else None
+
 
   def __len__(self) -> int:
     return len(self.trajectories_to_compare)
 
+
   def get_num_steps(self) -> int:
     return len(self.base_at_steps)
+
 
   def calculate_metric(
                         self,
@@ -45,8 +52,14 @@ class TrajectoryAnalyzer():
                               traj_idx=i,
                               metric_function=metric_function
                             ) for i in range(len(self))]
+    res["base_incremental"] = self.calculate_metric_incremental_base(metric_function=metric_function)
+    res["traj_incremental"] = [self.calculate_metric_incremental(
+                              traj_idx=i,
+                              metric_function=metric_function
+                            ) for i in range(len(self))]
 
     return res
+
 
   def calulate_all_metrics(
                         self,
@@ -54,6 +67,38 @@ class TrajectoryAnalyzer():
                       ) -> Dict:
 
     return { name: self.calculate_metric(metric_function=func) for func, name in metric_funcs }
+
+
+  def calculate_metric_incremental(
+                                self,
+                                traj_idx: int,
+                                metric_function: Callable
+                              ) -> List[float]:
+
+    mols = self.mols_to_compare_at_steps[traj_idx]
+    res = au.calculate_metric_many_to_many(
+                                        targets=mols[:-1],
+                                        mols=mols[1:],
+                                        align=True,
+                                        metric_function=metric_function
+                                      )  
+    return res
+
+
+  def calculate_metric_incremental_base(
+                                self,
+                                metric_function: Callable
+                              ) -> List[float]:
+
+    mols = self.base_at_steps
+    res = au.calculate_metric_many_to_many(
+                                        targets=mols[:-1],
+                                        mols=mols[1:],
+                                        align=True,
+                                        metric_function=metric_function
+                                      )  
+    return res
+
 
   def calculate_metric_to_base(self, metric_function: Callable) -> List[List[float]]:
     num_steps = self.get_num_steps()
@@ -69,6 +114,7 @@ class TrajectoryAnalyzer():
       res.append(metric_values)
   
     return res
+
 
   def calculate_metric_to_base_future(self, metric_function: Callable) -> List[List[float]]:
     num_steps = self.get_num_steps()
@@ -89,6 +135,7 @@ class TrajectoryAnalyzer():
   
     return res
 
+
   def calculate_metric_to_first(
                                 self,
                                 traj_idx: int,
@@ -103,6 +150,7 @@ class TrajectoryAnalyzer():
                                         metric_function=metric_function
                                       )  
     return res
+
 
   def calculate_metric_to_first_base(
                                 self,
