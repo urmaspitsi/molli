@@ -2,10 +2,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Set, Tuple, Union
 import numpy as np
-from scipy.spatial import distance_matrix
 
 from ase import Atoms
-
+import metrics as ms
 
 @dataclass
 class Feature():
@@ -82,11 +81,10 @@ class Volume(Feature):
   atom_idxs: List[int] = field(default_factory=list)
 
   def calculate_value(self, atoms_obj: Atoms) -> float:
-    pos = atoms_obj.positions \
-      if self.atom_idxs == None or len(self.atom_idxs) < 2 \
-      else atoms_obj.positions[self.atom_idxs]
-      
-    return np.product(np.max(pos, axis=0) - np.min(pos, axis=0))
+    return ms.volume_cube(
+                          atoms_obj=atoms_obj,
+                          atom_idxs=self.atom_idxs
+                          )
 
   def get_info(self, atoms_obj: Atoms) -> str:
     return "Volume"
@@ -100,11 +98,7 @@ class AverageDistance(Feature):
   atom_idxs: List[int] = field(default_factory=list)
 
   def calculate_value(self, atoms_obj: Atoms) -> float:
-    pos = atoms_obj.positions \
-      if self.atom_idxs == None or len(self.atom_idxs) < 2 \
-      else atoms_obj.positions[self.atom_idxs]
-    
-    return np.mean(distance_matrix(pos, pos))
+    return ms.average_distance(atom_idxs=atoms_obj, atom_idxs=self.atom_idxs)
 
   def get_info(self, atoms_obj: Atoms) -> str:
     return "Average distance between atoms"
