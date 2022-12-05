@@ -45,7 +45,7 @@ class TrajectoryAnalyzer():
     num_steps = self.get_num_steps()
     rmsd_vals = []
     for i in range(num_steps):
-      rmsds_to_target = [0 for x in range(len(self))]
+      rmsds_to_target = [0 for _ in range(len(self))]
       for traj_idx, mols in enumerate(self.mols_to_compare_at_steps):
         rmsds_to_target[traj_idx] = min([au.calculate_rmsd(
                                               target=self.base_at_steps[step_idx],
