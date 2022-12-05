@@ -80,17 +80,17 @@ gaussian_job_files = GU.create_gaussian_job_files_from_xyz_steps(
 # pbe1pbe_sto3g
 
 log_files_dirs = [
-    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex23_BP86_Def2SVPP_SVPFit_results"),
+    Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_s1_tpssh_gd3_def2svpp_svpfit_results"),
   ]
 
 gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
 
-output_dir = Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_ex23_BP86_Def2SVPP_SVPFit_logs")
+output_dir = Path("C:/tmp/gaussian/crest_reoptimize/crest_mol24_s1_tpssh_gd3_def2svpp_svpfit_logs")
 
 #aggregate_log_file_name = "aggregate_log.txt"
-aggregate_log_file_name = "mol24_ex23_bp86_def2svpp_svpfit_log.txt"
+aggregate_log_file_name = "mol24_s1_tpssh_gd3_def2svpp_svpfit_log.txt"
 
-aggregate_xyz_file = output_dir.joinpath("mol24_ex23_bp86_def2svpp_svpfit_10steps_confs.xyz")
+aggregate_xyz_file = output_dir.joinpath("mol24_s1_tpssh_gd3_def2svpp_svpfit_confs.xyz")
 #aggregate_xyz_file = None
 
 GU.process_many_log_files(
