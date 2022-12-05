@@ -24,10 +24,13 @@ class TrajectoryAnalyzer():
   def __len__(self) -> int:
     return len(self.trajectories_to_compare)
 
+  def get_num_steps(self) -> int:
+    return len(self.base_at_steps)
+
   def calculate_rmsd_to_base(self) -> List[List[float]]:
-    num_step_idxs = len(self.base_trajectory.item_idxs)
+    num_steps = self.get_num_steps()
     rmsd_vals = []
-    for i in range(num_step_idxs):
+    for i in range(num_steps):
       mols_at_i = [mols[i] for mols in self.mols_to_compare_at_steps]
       rmsds_to_target = au.calculate_rmsd_one_to_many(
                                                       target=self.base_at_steps[i],
@@ -39,9 +42,9 @@ class TrajectoryAnalyzer():
     return rmsd_vals
 
   def calculate_rmsd_to_base_future(self) -> List[List[float]]:
-    num_step_idxs = len(self.base_trajectory.item_idxs)
+    num_steps = self.get_num_steps()
     rmsd_vals = []
-    for i in range(num_step_idxs):
+    for i in range(num_steps):
       rmsds_to_target = [0 for x in range(len(self))]
       for traj_idx, mols in enumerate(self.mols_to_compare_at_steps):
         rmsds_to_target[traj_idx] = min([au.calculate_rmsd(
@@ -49,7 +52,7 @@ class TrajectoryAnalyzer():
                                               mol=mols[step_idx],
                                               align=True
                                             )
-                                            for step_idx in range(i, num_step_idxs)]
+                                            for step_idx in range(i, num_steps)]
                                       )
 
       rmsd_vals.append(rmsds_to_target)
