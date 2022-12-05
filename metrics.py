@@ -9,7 +9,8 @@ def mad_of_positions(mol1: Atoms, mol2: Atoms) -> float:
   '''
     Mean Absolute Distance between position coordinates.
   '''
-  return np.mean(np.abs(mol1.positions - mol2.positions))
+  return np.mean(np.linalg.norm(mol1.positions - mol2.positions, axis=1))
+  #return np.mean(np.abs(mol1.positions - mol2.positions))
 
 
 def mad_of_distances(mol1: Atoms, mol2: Atoms) -> float:
@@ -32,5 +33,6 @@ def rmsd_of_positions(mol1: Atoms, mol2: Atoms) -> float:
     Root Mean Squared Distance:
     Square root of the Average of Squared Distances between position coordinates.
   '''
-  return np.sqrt(np.mean((mol1.positions - mol2.positions)**2))
+  return np.sqrt(np.mean(np.linalg.norm(mol1.positions - mol2.positions, axis=1)**2))
+  #return np.sqrt(np.mean((mol1.positions - mol2.positions)**2))
 
