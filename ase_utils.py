@@ -276,6 +276,17 @@ def create_ase_atoms_list_from_xyz_file(
                                           name: str,
                                           item_idxs: Union[List[int], int, None]=None
                                         ) -> List[Atoms]:
+  '''
+    Returns list of Atoms from the xyz file specified.
+    If item_idxs is of type List[int], then only these items are returned: 0-based list indices.
+    If item_idxs is of type int, then returns number of items eaqual to the value of item_idxs.
+    First item is 0th element and last item is the last item in the file.
+    All intermediate items are linearly spaced.
+    0-index item, ..., ..., last-item in the file
+    Idea is to get a sub-sequence of certain lenght from a list,
+    starting from the first item and ending with the last item in the original list.
+    Useful for generating equal length lists when comparing different opt trajectories.
+  '''
 
   parsed_xyz_data = [x for x in xyz_parser.read_xyz_file(
                                               input_path=input_path,
