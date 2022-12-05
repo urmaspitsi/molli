@@ -1,11 +1,13 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, List, NamedTuple, Set, Tuple, Union
+import numpy as np
+
 from ase import Atoms
 
 import ase_utils as au
 from file_source import MultiItemFileSource
-
+from series_item import SeriesItem
 
 @dataclass
 class TrajectoryAnalyzer():
@@ -45,8 +47,12 @@ class TrajectoryAnalyzer():
                       ) -> Dict:
 
     res = {}
-    res["to_base"] = self.calculate_metric_to_base(metric_function=metric_function)
-    res["to_base_future"] = self.calculate_metric_to_base_future(metric_function=metric_function)
+    vs_base = self.calculate_metric_to_base(metric_function=metric_function)
+    vs_base_future = self.calculate_metric_to_base_future(metric_function=metric_function)
+    res["base_name"] = self.base_trajectory.name
+    res["names_to_compare"] = [x.name for x in self.trajectories_to_compare]
+    res["to_base"] = np.array(vs_base).transpose()
+    res["to_base_future"] = np.array(vs_base_future).transpose()
     res["base_to_start"] = self.calculate_metric_to_first_base(metric_function=metric_function)
     res["traj_to_start"] = [self.calculate_metric_to_first(
                               traj_idx=i,
