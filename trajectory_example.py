@@ -25,7 +25,7 @@ metric_funcs = [
 ###############################################################################
 
 trajectories_dir = Path("C:/tmp/gaussian/optimization_trajectories/mol24_ex16_crest5")
-num_steps = 5
+num_steps = 10
 
 base_trajectory = MultiItemFileSource(
     file_path=trajectories_dir.joinpath("mol24_ex16_crest5_PBE1PBE_cc_pVTZ_TZVPFit_opt_steps.xyz"),
@@ -176,7 +176,25 @@ mol24_ex19_crest23_traj_analyzer.metrics["mean_abs_diff"]["to_base"]
 mol24_ex0a_crest10_traj_analyzer.metrics["mean_abs_diff"]["to_base"]
 
 #%%
+for i, traj_to_compare in enumerate(mol24_ex0a_crest10_traj_analyzer.trajectories_to_compare):
+  print(mol24_ex0a_crest10_traj_analyzer.description)
+  print(traj_to_compare.name, "diff to: ", mol24_ex0a_crest10_traj_analyzer.base_trajectory.name)
+  print("mean_abs_diff (angstroms)")
+  print([round(x[i],3) for x in mol24_ex0a_crest10_traj_analyzer.metrics["mean_abs_diff"]["to_base"]])
+  print("-" * 80)
+
 
 #%%
+[x[0] for x in mol24_ex0a_crest10_traj_analyzer.metrics["mean_abs_diff"]["to_base"]]
+
 #%%
+[x[1] for x in mol24_ex0a_crest10_traj_analyzer.metrics["mean_abs_diff"]["to_base"]]
+
+#%%
+[x[2] for x in mol24_ex0a_crest10_traj_analyzer.metrics["mean_abs_diff"]["to_base"]]
+
+#%%
+[x[3] for x in mol24_ex0a_crest10_traj_analyzer.metrics["mean_abs_diff"]["to_base"]]
+#%%
+[x[4] for x in mol24_ex0a_crest10_traj_analyzer.metrics["mean_abs_diff"]["to_base"]]
 #%%
