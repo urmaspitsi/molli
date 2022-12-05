@@ -176,6 +176,10 @@ mol24_ex19_crest23_traj_analyzer.metrics["mean_abs_diff"]["to_base"]
 mol24_ex0a_crest10_traj_analyzer.metrics["mean_abs_diff"]["to_base"]
 
 #%%
+mol24_ex0a_crest10_traj_analyzer.metrics.keys()
+
+# dict_keys(['mean_abs_diff', 'root_mean_of_sq_diffs'])
+#%%
 for i, traj_to_compare in enumerate(mol24_ex0a_crest10_traj_analyzer.trajectories_to_compare):
   print(mol24_ex0a_crest10_traj_analyzer.description)
   print(traj_to_compare.name, "diff to: ", mol24_ex0a_crest10_traj_analyzer.base_trajectory.name)
@@ -198,3 +202,22 @@ for i, traj_to_compare in enumerate(mol24_ex0a_crest10_traj_analyzer.trajectorie
 #%%
 [x[4] for x in mol24_ex0a_crest10_traj_analyzer.metrics["mean_abs_diff"]["to_base"]]
 #%%
+
+
+#%%
+import numpy as np
+
+# %%
+atom_idx = 0
+mol1 = mol24_ex0a_crest10_traj_analyzer.base_at_steps[-1]
+mol2 = mol24_ex0a_crest10_traj_analyzer.mols_to_compare_at_steps[0][-1]
+mol2 = au.align_2_molecules_min_rmsd(target=mol1, atoms_to_align=mol2)
+
+#np.linalg.norm(pos1 - pos2)
+np.mean(np.linalg.norm(mol1.positions - mol2.positions, axis=1))
+
+# %%
+np.linalg.norm(np.array([[0,0]]) - np.array([[3,4]]), axis=1)
+
+# %%
+# %%
