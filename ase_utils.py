@@ -223,7 +223,8 @@ def create_ase_atoms_from_xyz_data(xyz_data: Dict) -> Atoms:
 
 def create_ase_atoms_list_from_xyz_file(
                                           input_path: Path,
-                                          name: str
+                                          name: str,
+                                          item_idxs: Union[List[int], int, None]=None
                                         ) -> List[Atoms]:
 
   parsed_xyz_data = [x for x in xyz_parser.read_xyz_file(
@@ -243,6 +244,22 @@ def create_ase_atoms_list_from_xyz_file(
     else:
       # single xyz geometry or no idx information
       xyz["name"] = name
+
+  idxs = None
+  # If item_idxs is integer then means num_items and generates linspaced 
+  # list of integers between 0 and len(parsed_xyz_data)
+  if item_idxs:
+    if isinstance(item_idxs, int) and item_idxs > 1:
+      idxs = ut.linspace_idx(start_idx=0, end_idx=(len(parsed_xyz_data) - 1), num_items=item_idxs)
+    elif isinstance(item_idxs, list) and len(item_idxs) > 0:
+      idxs = item_idxs
+
+  # Filters by given list of item_idxs
+  if idxs and len(idxs) > 0:
+    parsed_xyz_data = ut.get_list_slice_by_idxs(
+                          input_list=parsed_xyz_data,
+                          idxs=idxs
+                          )
 
   res = [create_ase_atoms_from_xyz_data(x) for x in parsed_xyz_data]
 
@@ -278,11 +295,10 @@ def extract_mols_from_xyz_files(
       sources: List[MultiItemFileSource]
     ) -> List[List[Atoms]]:
 
-  res = [ut.get_list_slice_by_idxs(
-              input_list=create_ase_atoms_list_from_xyz_file(
+  res = [create_ase_atoms_list_from_xyz_file(
                     input_path=src.file_path,
-                    name=src.name),
-              idxs=src.item_idxs)
+                    name=src.name,
+                    item_idxs=src.item_idxs)
           for src in sources]
 
   return res
