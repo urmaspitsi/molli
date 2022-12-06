@@ -464,7 +464,7 @@ def process_many_log_files(
                             extract_summary_step_nr: int=0,
                             do_only_summary: bool=False,
                             write_last_opt_steps_file_path: Path=None
-                            ):
+                            ) -> Dict:
 
   res = [process_one_log_file(
             x,
@@ -536,12 +536,17 @@ def process_many_log_files(
   if len(errors) > 0:
     summary["error"] = errors
 
-  res.insert(0, summary)
+  # res.insert(0, summary)
+
+  result_dict = {
+                  "summary": summary,
+                  "experiments": res,
+                }
 
   if output_dir != None:
     ut.write_text_file_json(
         file_name=Path(output_dir).joinpath(aggregate_log_file_name),
-        data=res
+        data=result_dict
       )
 
 
