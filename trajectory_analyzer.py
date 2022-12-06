@@ -49,6 +49,8 @@ class TrajectoryAnalyzer():
     res = {}
     vs_base = self.calculate_metric_to_base(metric_function=metric_function)
     vs_base_future = self.calculate_metric_to_base_future(metric_function=metric_function)
+    vs_base_last_step = self.calculate_metric_to_base_last_step(metric_function=metric_function)
+
     res["base_name"] = self.base_trajectory.name
     res["names_to_compare"] = [x.name for x in self.trajectories_to_compare]
     res["to_base"] = np.array(vs_base).transpose()
@@ -142,6 +144,22 @@ class TrajectoryAnalyzer():
     return res
 
 
+  def calculate_metric_to_base_last_step(self, metric_function: Callable) -> List[List[float]]:
+    base_at_last_step = self.base_at_steps[-1]
+    num_steps = self.get_num_steps()
+    res = []
+    for i in range(num_steps):
+      mols_at_i = [mols[i] for mols in self.mols_to_compare_at_steps]
+      metric_values = au.calculate_metric_one_to_many(
+                                                      target=base_at_last_step,
+                                                      mols=mols_at_i,
+                                                      align=True,
+                                                      metric_function=metric_function
+                                                    )
+      res.append(metric_values)
+  
+    return res
+
   def calculate_metric_to_first(
                                 self,
                                 traj_idx: int,
@@ -158,6 +176,22 @@ class TrajectoryAnalyzer():
     return res
 
 
+  def calculate_metric_to_last(
+                                self,
+                                traj_idx: int,
+                                metric_function: Callable
+                              ) -> List[float]:
+
+    mols = self.mols_to_compare_at_steps[traj_idx]
+    res = au.calculate_metric_one_to_many(
+                                        target=mols[-1],
+                                        mols=mols,
+                                        align=True,
+                                        metric_function=metric_function
+                                      )  
+    return res
+
+
   def calculate_metric_to_first_base(
                                 self,
                                 metric_function: Callable
@@ -165,6 +199,20 @@ class TrajectoryAnalyzer():
     mols = self.base_at_steps
     res = au.calculate_metric_one_to_many(
                                         target=mols[0],
+                                        mols=mols,
+                                        align=True,
+                                        metric_function=metric_function
+                                      )  
+    return res
+
+
+  def calculate_metric_to_last_base(
+                                self,
+                                metric_function: Callable
+                              ) -> List[float]:
+    mols = self.base_at_steps
+    res = au.calculate_metric_one_to_many(
+                                        target=mols[-1],
                                         mols=mols,
                                         align=True,
                                         metric_function=metric_function
