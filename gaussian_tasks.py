@@ -285,5 +285,3 @@ near_similars_mad = au.calculate_metric_between_two_molecules(
 near_similars_mad
 
 # %%
-
-# %%
