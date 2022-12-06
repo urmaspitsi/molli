@@ -55,7 +55,9 @@ class TrajectoryAnalyzer():
     res["names_to_compare"] = [x.name for x in self.trajectories_to_compare]
     res["to_base"] = np.array(vs_base).transpose()
     res["to_base_future"] = np.array(vs_base_future).transpose()
+    res["to_base_last_step"] = np.array(vs_base_last_step).transpose()
     res["base_to_start"] = self.calculate_metric_to_first_base(metric_function=metric_function)
+    res["base_to_last"] = self.calculate_metric_to_last_base(metric_function=metric_function)
     res["traj_to_start"] = [self.calculate_metric_to_first(
                               traj_idx=i,
                               metric_function=metric_function
@@ -159,6 +161,7 @@ class TrajectoryAnalyzer():
       res.append(metric_values)
   
     return res
+
 
   def calculate_metric_to_first(
                                 self,
