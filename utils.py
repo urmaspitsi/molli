@@ -87,6 +87,13 @@ def read_text_file_as_lines(file_path: Union[str, Path]) -> List[str]:
   return lines
 
 
+def read_json_file_to_dict(file_path: Union[str, Path]) -> Dict:
+  with open(file_path) as f:
+    res = json.load(f)
+
+  return res
+  
+
 def to_json_str(data: Any) -> str:
   return json.dumps(data, sort_keys=False, indent=4)
 
