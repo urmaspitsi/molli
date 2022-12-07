@@ -1,6 +1,6 @@
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple, Union
+from typing import Any, Callable, Dict, List, Set, Tuple, Union
 import numpy as np
 
 from ase import Atoms
@@ -436,4 +436,50 @@ def get_bonds(
 
   ana = Analysis(mol)
   return ana.get_bonds(element1, element2, unique=True)[0]
+
+
+def get_bonds_as_set(
+              mol: Atoms,
+              element1: str,
+              element2: str,
+            ) -> List[Tuple[int]]:
+  '''
+    Returns list of tuples of atom idxs.
+  '''
+
+  return convert_bonds_to_set(
+                              bonds=get_bonds(
+                                      mol=mol,
+                                      element1=element1,
+                                      element2=element2
+                                    )
+                            )
+
+
+def convert_bonds_to_set(bonds: List[Tuple[int]]) -> Set[Tuple[int]]:
+  res = set()
+  for i, j in bonds:
+    if i < j:
+      res.add((i, j))
+    else:
+      res.add((j, i))
+
+  return res
+
+
+def get_bonds_diff(bonds1: Set[Tuple[int]], bonds2: Set[Tuple[int]]) -> Tuple[Set[Tuple[int]]]:
+  '''
+    Returns tuple of 2-sets: missing_in_bonds1, missing_in_bonds2
+  '''
+  diff = bonds1.symmetric_difference(bonds2)
+  missing_in_bonds1 = set()
+  missing_in_bonds2 = set()
+  for pair in diff:
+    if pair not in bonds1:
+      missing_in_bonds1.add(pair)
+    else:
+      missing_in_bonds2.add(pair)
+
+  return (missing_in_bonds1, missing_in_bonds2)
+
 
