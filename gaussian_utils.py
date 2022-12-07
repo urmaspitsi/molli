@@ -477,11 +477,33 @@ def process_many_log_files(
   errors = []
 
   # filter out experiments with missing data
-  items_with_errors = [x for x in res if "energy_end" not in x["results"]["scf_summary"]]
-  if len(items_with_errors) > 0:
-    errors.append({"energy_end_not_found": [x["input_path"] for x in items_with_errors]})
-    res = [x for x in res if "energy_end" in x["results"]["scf_summary"]]
+  items_with_errors = []
+  valid_items = []
+  valid_paths = []
+  for idx, res_item in enumerate(res):
+    is_error = "error" in res_item["results"]["scf_summary"] \
+        or "energy_end" not in res_item["results"]["scf_summary"]
+    if is_error:
+      items_with_errors.append(res_item)
+    else:
+      valid_items.append(res_item)
+      valid_paths.append(input_paths[idx])
 
+  # items_with_errors = [x for x in res if "energy_end" not in x["results"]["scf_summary"]]
+  if len(items_with_errors) > 0:
+    items_with_errors_summary_files = []
+    try:
+      items_with_errors_summary_files = [x["results"]["scf_summary"]["scf_summary_file"] for x in items_with_errors],
+    except:
+      pass
+
+    errors.append({
+      "missing_data_error": "Necessary data is missing from log file. Further details in the specific item's summary file.",
+      "items_with_errors": [x["input_path"] for x in items_with_errors],
+      "scf_summary_files": items_with_errors_summary_files,
+      })
+    res = valid_items
+    #res = [x for x in res if "energy_end" in x["results"]["scf_summary"]]
 
   # try sort ascending by final energy
   diff_best_worst_str = ""
@@ -512,12 +534,7 @@ def process_many_log_files(
       last_opt_steps_xyz = [extract_optimization_steps_as_xyz(
                                                     file_path=x,
                                                     collect_to_single_list=False
-                                                    )[-1] for x in input_paths]
-
-      # aggregate_xyz_res = ut.write_text_file_from_lines(
-      #       file_path=write_last_opt_steps_file_path,
-      #       lines=ut.flatten_list(last_opt_steps_xyz)
-      #     )
+                                                    )[-1] for x in valid_paths]
 
       dicts = [xyz_parser.convert_xyz_lines_to_dict(x, convert_coords_to_float=True) for x in last_opt_steps_xyz]
 
@@ -542,8 +559,6 @@ def process_many_log_files(
 
   if len(errors) > 0:
     summary["error"] = errors
-
-  # res.insert(0, summary)
 
   result_dict = {
                   "summary": summary,
