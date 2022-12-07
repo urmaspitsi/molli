@@ -209,6 +209,23 @@ def extract_scf_summary(
 
   result_summary_dict = {}
   lines = ut.read_text_file_as_lines(file_path=file_path)
+
+  gaussian_command = ""
+  dft_functional = ""
+
+  try:
+    gaussian_command = lines[ut.get_block_start_line_nrs(
+                                              lines=lines,
+                                              search_text=" #"
+                                              )[0]].strip()
+    dft_functional = gaussian_command.split()[1]
+
+  except:
+    pass
+
+  result_summary_dict["gaussian_command"] = gaussian_command
+  result_summary_dict["dft_functional"] = dft_functional
+
   block_lines = ut.get_block_start_line_nrs(
                                             lines=lines,
                                             search_text="SCF Done:"
@@ -328,15 +345,19 @@ def extract_and_write_scf_summary_from_gaussian_logfile(
                                   max_step_nr=max_step_nr
                                   )
 
+    first_part = {
+      "scf_summary_file": "",
+      }
+
     if output_path:
       write_result = ut.write_text_file_from_lines(
                                     file_path=output_path,
                                     lines=summary["text_lines"]
                                   )
 
-    first_part = {
-      "scf_summary_file": Path(output_path).name,
-      }
+      first_part = {
+        "scf_summary_file": Path(output_path).name,
+        }
 
     last_part = summary["summary"]
     res = {**first_part, **last_part}
