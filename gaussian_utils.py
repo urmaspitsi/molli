@@ -476,6 +476,13 @@ def process_many_log_files(
   summary = {}
   errors = []
 
+  # filter out experiments with missing data
+  items_with_errors = [x for x in res if "energy_end" not in x["results"]["scf_summary"]]
+  if len(items_with_errors) > 0:
+    errors.append({"energy_end_not_found": [x["input_path"] for x in items_with_errors]})
+    res = [x for x in res if "energy_end" in x["results"]["scf_summary"]]
+
+
   # try sort ascending by final energy
   diff_best_worst_str = ""
   rank_list = []
