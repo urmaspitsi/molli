@@ -315,6 +315,37 @@ def extract_scf_summary(
   return res
 
 
+def extract_and_write_scf_summary_from_gaussian_logfile(
+                                    log_file_path: Union[str, Path],
+                                    output_path: Union[str, Path, None],
+                                    max_step_nr: int=0
+                                    ) -> Dict:
+
+  try:
+    summary = extract_scf_summary(
+                                  file_path=log_file_path,
+                                  collect_to_single_list=True,
+                                  max_step_nr=max_step_nr
+                                  )
+
+    if output_path:
+      write_result = ut.write_text_file_from_lines(
+                                    file_path=output_path,
+                                    lines=summary["text_lines"]
+                                  )
+
+    first_part = {
+      "scf_summary_file": Path(output_path).name,
+      }
+
+    last_part = summary["summary"]
+    res = {**first_part, **last_part}
+    return res
+
+  except Exception as ex:
+    return str(ex)
+
+
 def write_optimization_steps_from_gaussian_logfile(
                                     log_file_path: Union[str, Path],
                                     output_path: Union[str, Path]
@@ -343,36 +374,6 @@ def write_last_optimization_step_from_gaussian_logfile(
 
     last_block = xyz_blocks[-1]
     return ut.write_text_file_from_lines(file_path=output_path, lines=last_block)
-
-  except Exception as ex:
-    return str(ex)
-
-
-def write_scf_summary_from_gaussian_logfile(
-                                    log_file_path: Union[str, Path],
-                                    output_path: Union[str, Path],
-                                    max_step_nr: int=0
-                                    ) -> Dict:
-
-  try:
-    summary = extract_scf_summary(
-                                  file_path=log_file_path,
-                                  collect_to_single_list=True,
-                                  max_step_nr=max_step_nr
-                                  )
-
-    write_result = ut.write_text_file_from_lines(
-                                  file_path=output_path,
-                                  lines=summary["text_lines"]
-                                )
-
-    first_part = {
-      "scf_summary_file": Path(output_path).name,
-      }
-
-    last_part = summary["summary"]
-    res = {**first_part, **last_part}
-    return res
 
   except Exception as ex:
     return str(ex)
@@ -441,8 +442,11 @@ def process_one_log_file(
                                         output_path=output_path_standard_orientation
                                         )
 
-  output_path_scf = Path(out_dir).joinpath(f"{output_file_name_stem}_scf_summary.txt")
-  task_results["scf_summary"] = write_scf_summary_from_gaussian_logfile(
+  output_path_scf = None \
+                    if do_only_summary \
+                    else Path(out_dir).joinpath(f"{output_file_name_stem}_scf_summary.txt")
+
+  task_results["scf_summary"] = extract_and_write_scf_summary_from_gaussian_logfile(
                                     log_file_path=input_path,
                                     output_path=output_path_scf,
                                     max_step_nr=extract_summary_step_nr
