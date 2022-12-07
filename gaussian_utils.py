@@ -525,7 +525,9 @@ def process_many_log_files(
   except Exception as ex:
     errors.append(str(ex))
 
-  summary["num_experiments"] = len(res)
+  summary["num_experiments_successful"] = len(res)
+  summary["num_experiments_failed"] = len(items_with_errors)
+  summary["num_experiments_total"] = len(res) + len(items_with_errors)
   summary["energy_diff_best_worst"] = diff_best_worst_str
   summary["ranking"] = rank_list
 
