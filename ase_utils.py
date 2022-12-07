@@ -5,6 +5,7 @@ import numpy as np
 
 from ase import Atoms
 from ase.build import minimize_rotation_and_translation
+from ase.geometry.analysis import Analysis
 
 import constants as C
 from dataset import Dataset
@@ -422,4 +423,17 @@ def write_aligned_xyz_file(
             atoms_list=aligned_mols,
             output_path=output_path
           )
+
+
+def get_bonds(
+              mol: Atoms,
+              element1: str,
+              element2: str,
+            ) -> List[Tuple[int]]:
+  '''
+    Returns list of tuples of atom idxs.
+  '''
+
+  ana = Analysis(mol)
+  return ana.get_bonds(element1, element2, unique=True)[0]
 
