@@ -11,8 +11,8 @@ import metrics as ms
 @dataclass
 class Constraint():
   label: str
-  value: float
   condition: str
+  value: float
   abs_tolerance: float = 0.0000001
 
   def satisfied(self, test_with_value: float) -> bool:
@@ -40,6 +40,9 @@ class MoleculeFeatureConstraints():
   label: str
   molecule: Atoms
   feature_constraints: List[FeatureConstraint]
+
+  def __call__(self, *args: Any, **kwds: Any) -> bool:
+    return self.satisfied()
 
   def satisfied(self) -> bool:
     mol = self.molecule
