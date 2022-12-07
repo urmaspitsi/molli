@@ -98,7 +98,10 @@ class AverageDistance(Feature):
   atom_idxs: List[int] = field(default_factory=list)
 
   def calculate_value(self, atoms_obj: Atoms) -> float:
-    return ms.average_distance(atom_idxs=atoms_obj, atom_idxs=self.atom_idxs)
+    return ms.average_distance(
+        atoms_obj=atoms_obj,
+        atom_idxs=self.atom_idxs
+      )
 
   def get_info(self, atoms_obj: Atoms) -> str:
     return "Average distance between atoms"
