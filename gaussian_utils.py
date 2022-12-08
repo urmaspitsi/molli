@@ -201,6 +201,56 @@ def extract_optimization_steps_as_xyz(
   return res
 
 
+def extract_gaussian_version(lines: List[str]) -> str:
+  res = ""
+
+  try:
+    res = lines[ut.get_block_start_line_nrs(
+                                            lines=lines,
+                                            search_text="Cite this work as:"
+                                            )[0] + 1].strip()
+
+  except:
+    res = ""
+
+  return res
+
+
+def extract_dft_info(lines: List[str]) -> str:
+  res = ""
+
+  try:
+    dft_info_line_nr = ut.get_block_start_line_nrs(
+                                              lines=lines,
+                                              search_text="Rotational constants"
+                                              )[0] + 1
+    basis_functions_info = lines[dft_info_line_nr].strip()
+    electrons_info = lines[dft_info_line_nr + 1].strip()
+    res = f"{basis_functions_info}, {electrons_info}"
+
+  except:
+    res = ""
+
+  return res
+
+
+def extract_gaussian_command_and_dft_functional(lines: List[str]) -> Tuple(str, str):
+  res = ("", "")
+
+  try:
+    gaussian_command = lines[ut.get_block_start_line_nrs(
+                                              lines=lines,
+                                              search_text=" #"
+                                              )[0]].strip()
+    dft_functional = gaussian_command.split()[1]
+    res = (gaussian_command, dft_functional)
+
+  except:
+    res = ("", "")
+
+  return res
+
+
 def extract_scf_summary(
                         file_path: Union[str, Path],
                         collect_to_single_list: bool,
@@ -210,21 +260,14 @@ def extract_scf_summary(
   result_summary_dict = {}
   lines = ut.read_text_file_as_lines(file_path=file_path)
 
-  gaussian_command = ""
-  dft_functional = ""
+  result_summary_dict["gaussian_version"] = extract_gaussian_version(lines=lines)
 
-  try:
-    gaussian_command = lines[ut.get_block_start_line_nrs(
-                                              lines=lines,
-                                              search_text=" #"
-                                              )[0]].strip()
-    dft_functional = gaussian_command.split()[1]
-
-  except:
-    pass
-
+  gaussian_command, dft_functional = extract_gaussian_command_and_dft_functional(lines=lines)
   result_summary_dict["gaussian_command"] = gaussian_command
   result_summary_dict["dft_functional"] = dft_functional
+
+  result_summary_dict["dft_info"] = extract_dft_info(lines=lines)
+
 
   block_lines = ut.get_block_start_line_nrs(
                                             lines=lines,
