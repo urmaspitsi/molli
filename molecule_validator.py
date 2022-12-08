@@ -39,7 +39,7 @@ def get_missing_bonds_info(
                             bonds: List[Tuple[int, int]]
                           ) -> List[str]:
 
-  res = [f"{x}, dist_in_target={round(tm.bonds_distances[x], 3)}, dist_in_mol={round(mol.get_distance(x[0], x[1]),3)}" for x in bonds]
+  res = [f"{x}, dist_in_target={round(tm.bonds_distances[x], 3) if x in tm.bonds_distances else 'n/a'}, dist_in_mol={round(mol.get_distance(x[0], x[1]),3)}" for x in bonds]
 
   return res
 
