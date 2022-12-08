@@ -95,9 +95,9 @@ gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
 output_dir = Path("C:/tmp/gaussian/optimize/crest_ex0a_PBE1PBE_STO3G/molli_results")
 
 #aggregate_log_file_name = "aggregate_log.txt"
-aggregate_log_file_name = "ex0a_pbe1pbe_sto3g_log.txt"
+aggregate_log_file_name = "crest_ex0a_bp86_pbe1pbe_sto3g_log.txt"
 
-aggregate_xyz_file = output_dir.joinpath("ex0a_pbe1pbe_sto3g_confs.xyz")
+aggregate_xyz_file = output_dir.joinpath("crest_ex0a_pbe1pbe_sto3g_svpfit_confs.xyz")
 #aggregate_xyz_file = None
 
 GU.process_many_log_files(
@@ -115,13 +115,13 @@ GU.process_many_log_files(
 ############################################################################
 
 log_files_dirs = [
-    Path("C:/tmp/gaussian/optimize/pbe1pbe_cc_pvtz_tzvpfit_results"),
+    Path("C:/tmp/gaussian/optimize/pbe1pbe_cc_pvtz_tzvpfit/gaussian_results"),
   ]
 
 dft_name = "pbe1pbe_cc_pvtz_tzvpfit"
 
 gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
-output_dir = Path("C:/tmp/gaussian/optimize/pbe1pbe_cc_pvtz_tzvpfit_logs")
+output_dir = Path("C:/tmp/gaussian/optimize/pbe1pbe_cc_pvtz_tzvpfit/molli_results")
 aggregate_log_file_name = f"{dft_name}_log.txt"
 aggregate_xyz_file = output_dir.joinpath(f"{dft_name}_confs.xyz")
 
@@ -290,5 +290,14 @@ near_similars_mad = au.calculate_metric_between_two_molecules(
                       )
 
 near_similars_mad
+
+# %%
+
+au.write_ase_atoms_to_xyz_file()
+
+
+# %%
+
+# %%
 
 # %%
