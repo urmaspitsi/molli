@@ -329,15 +329,14 @@ def create_ase_atoms_list_from_xyz_file(
 
 
 def create_ase_atoms_list_from_xyz_files(
-                                          input_paths: List[Path],
-                                          name: str,
+                                          input_paths: List[Path]
                                         ) -> List[Atoms]:
 
   return ut.flatten_list(
               [
                 create_ase_atoms_list_from_xyz_file(
                                                     input_path=p,
-                                                    name=name
+                                                    name=p.stem
                                                   )
                     for p in input_paths
               ]
