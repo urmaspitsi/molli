@@ -58,31 +58,31 @@ def validate_with_target_molecule_bonds(mol: Atoms) -> Dict:
   res = { "is_valid": is_ok }
 
   if num_missing_cc > 0:
-    res["cc"] = {}
+    res["C-C"] = {}
 
   if num_missing_ch > 0:
-    res["ch"] = {}
+    res["C-H"] = {}
 
   if num_missing_co > 0:
-    res["co"] = {}
+    res["C-O"] = {}
 
   if len(missing_cc_in_target) > 0:
-    res["cc"]["new_cc_bonds"] = list(missing_cc_in_target)
+    res["C-C"]["new_cc_bonds"] = list(missing_cc_in_target)
 
   if len(missing_cc_in_mol) > 0:
-    res["cc"]["lost_cc_bonds"] = list(missing_cc_in_mol)
+    res["C-C"]["lost_cc_bonds"] = list(missing_cc_in_mol)
 
   if len(missing_ch_in_target) > 0:
-    res["ch"]["new_ch_bonds"] = list(missing_ch_in_target)
+    res["C-H"]["new_ch_bonds"] = list(missing_ch_in_target)
 
   if len(missing_ch_in_mol) > 0:
-    res["ch"]["lost_ch_bonds"] = list(missing_ch_in_mol)
+    res["C-H"]["lost_ch_bonds"] = list(missing_ch_in_mol)
 
   if len(missing_co_in_target) > 0:
-    res["co"]["new_co_bonds"] = list(missing_co_in_target)
+    res["C-O"]["new_co_bonds"] = list(missing_co_in_target)
 
   if len(missing_co_in_mol) > 0:
-    res["co"]["lost_co_bonds"] = list(missing_co_in_mol)
+    res["C-O"]["lost_co_bonds"] = list(missing_co_in_mol)
 
   return res
 
