@@ -234,7 +234,7 @@ def extract_dft_info(lines: List[str]) -> str:
   return res
 
 
-def extract_gaussian_command_and_dft_functional(lines: List[str]) -> Tuple(str, str):
+def extract_gaussian_command_and_dft_functional(lines: List[str]) -> Tuple[str, str]:
   res = ("", "")
 
   try:
