@@ -33,8 +33,10 @@ def read_aggregate_summary_to_dict(
     ]
 
   columns_from_scf_summary = [
+    "gaussian_version",
     "gaussian_command",
     "dft_functional",
+    "dft_info",
     "optimization_converged",
     "elapsed_time_str",
     "elapsed_time_minutes",
