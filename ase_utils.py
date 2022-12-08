@@ -328,6 +328,22 @@ def create_ase_atoms_list_from_xyz_file(
   return res
 
 
+def create_ase_atoms_list_from_xyz_files(
+                                          input_paths: List[Path],
+                                          name: str,
+                                        ) -> List[Atoms]:
+
+  return ut.flatten_list(
+              [
+                create_ase_atoms_list_from_xyz_file(
+                                                    input_path=p,
+                                                    name=name
+                                                  )
+                    for p in input_paths
+              ]
+            )
+
+
 def create_ase_atoms_list_from_dataset(dataset: Dataset) -> List[Atoms]:
 
   res = []
