@@ -46,9 +46,9 @@ def get_missing_bonds_info(
   for x in bonds:
     item_info = {
       "bond": f"{symbols[x[0]]}-{symbols[x[1]]}",
-      "atom_idxs": x,
+      "atom_idxs": (int(x[0]), int(x[1])),
       "dist_in_target": round(target_distances[x], 3) if x in target_distances else 'n/a',
-      "dist_in_mol": round(mol.get_distance(x[0], x[1]),3),
+      "dist_in_mol": round(mol.get_distance(x[0], x[1]), 3),
     }
     res.append(item_info)
 
