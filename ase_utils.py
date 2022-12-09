@@ -259,7 +259,7 @@ def create_ase_atoms_from_xyz_data(xyz_data: Dict) -> Atoms:
 
   atomic_nrs = [C.get_atomic_number(i) for i in elem_coords["elements"]]
   info = {}
-  info_keys = ["name", "description"]
+  info_keys = ["name", "description", "source"]
 
   for k in info_keys:
     if k in xyz_data:
@@ -399,6 +399,10 @@ def get_description_from_atoms(mol: Atoms) -> str:
   return get_info_item_from_atoms(mol, info_key="description")
 
 
+def get_source_from_atoms(mol: Atoms) -> str:
+  return get_info_item_from_atoms(mol, info_key="source")
+
+
 def write_ase_atoms_to_xyz_file(
             atoms_list: List[Atoms],
             output_path: Union[str, Path]
@@ -406,7 +410,7 @@ def write_ase_atoms_to_xyz_file(
 
   res = []
   for mol in atoms_list:
-    description = f"{get_name_from_atoms(mol)} {get_description_from_atoms(mol)}"
+    description = f"{get_name_from_atoms(mol)}, {get_description_from_atoms(mol)}, source: {get_source_from_atoms(mol)}"
     lines = [xyz_parser.convert_xyz_coords_to_str(el, x, y, z) \
               for el, (x,y,z) in zip(mol.get_chemical_symbols(), list(mol.positions))]
 

@@ -107,6 +107,7 @@ def read_xyz_file(
             "xyz_lines": xyz_lines,
             "start_line": start_line,
             "idx": idx,
+            "source": Path(input_path).name,
             }
         )
 
