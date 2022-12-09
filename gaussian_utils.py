@@ -111,6 +111,75 @@ def extract_opt_step_as_xyz_lines(
   return final_xyz_block
 
 
+def extract_elapsed_time(lines: List[str]) -> str:
+  res = ""
+
+  try:
+    line_nr = ut.get_block_start_line_nrs(
+                                          lines=lines,
+                                          search_text="Elapsed time:"
+                                          )[0]
+
+    res = lines[line_nr].lstrip().rstrip().replace("time:      ", "time:").replace(" days", "d").replace(" hours", "h").replace(" minutes", "m").replace(" seconds.", "s")
+
+  except:
+    res = ""
+
+  return res
+
+
+def extract_job_completion_datetime(lines: List[str]) -> str:
+  res = ""
+
+  try:
+    res = lines[-1].strip()
+    if res.startswith("Normal termination of Gaussian"):
+      res = res.split("at")[1].replace(".", "")
+      weekday, month_name, day, time, year = res.split()
+      res = f"{day}-{month_name}-{year} {time}"
+  except:
+    res = ""
+
+  return res
+
+
+def extract_job_cpu_time(lines: List[str]) -> str:
+  res = ""
+
+  try:
+    line_nr = ut.get_block_start_line_nrs(
+                                          lines=lines,
+                                          search_text="Job cpu time:"
+                                          )[0]
+
+    res = lines[line_nr].lstrip().rstrip().replace("time:      ", "time:").replace(" days", "d").replace(" hours", "h").replace(" minutes", "m").replace(" seconds.", "s")
+
+  except:
+    res = ""
+
+  return res
+
+
+def get_total_minutes_from_elapsed_time(elapsed_time: str) -> int:
+  if elapsed_time == None or len(elapsed_time) < 1:
+    return 0
+  else:
+    total_minutes = 0
+
+    try:
+      _,_, days, hours, minutes, seconds = elapsed_time.split()
+
+      total_minutes = int(days[:-1].strip()) * 24 * 60 \
+                    + int(hours[:-1].strip()) * 60 \
+                    + int(minutes[:-1].strip()) \
+                    + float(seconds[:-1].strip()) / 60
+
+    except:
+      total_minutes = 0
+
+    return total_minutes
+
+
 def extract_final_xyz(
                       file_path: Union[str, Path],
                       ) -> List[str]:
@@ -269,7 +338,6 @@ def extract_scf_summary(
 
   result_summary_dict["dft_info"] = extract_dft_info(lines=lines)
 
-
   block_lines = ut.get_block_start_line_nrs(
                                             lines=lines,
                                             search_text="SCF Done:"
@@ -279,6 +347,7 @@ def extract_scf_summary(
                                             lines=lines,
                                             search_text="Stationary point found"
                                             )
+
   is_converged = True \
     if converged_line_nrs and len(converged_line_nrs) > 0 \
     else False
@@ -292,7 +361,6 @@ def extract_scf_summary(
 
     if ignore_shorter_runs and len(block_lines) < max_step_nr:
       result_summary_dict["error"] = f"Too few optimization steps, num_steps_required={max_step_nr}, num_steps_available={len(block_lines)}"
-
 
   num_steps = len(block_lines)
   steps_pct = 1 if num_steps_original == num_steps else num_steps / num_steps_original
@@ -312,20 +380,12 @@ def extract_scf_summary(
   try:
     minutes_per_step = 0
     total_minutes = 0
-    elapsed_time_line_nrs = ut.get_block_start_line_nrs(lines, "Elapsed time:")
-    if elapsed_time_line_nrs == None or len(elapsed_time_line_nrs) < 1:
+    elapsed_time = extract_elapsed_time(lines=lines)
+    if elapsed_time == None or len(elapsed_time) < 1:
       elapsed_time = "Elapsed time info not found"
       result_summary_dict["error"] = "Did not find the phrase: 'Elapsed time:' in the input file."
     else:
-      time_line_idx = elapsed_time_line_nrs[0]
-      elapsed_time = lines[time_line_idx].lstrip().rstrip().replace("time:      ", "time:").replace(" days", "d").replace(" hours", "h").replace(" minutes", "m").replace(" seconds.", "s")
-      _,_, days, hours, minutes, seconds = elapsed_time.split()
-
-      total_minutes = int(days[:-1].strip()) * 24 * 60 \
-                    + int(hours[:-1].strip()) * 60 \
-                    + int(minutes[:-1].strip()) \
-                    + float(seconds[:-1].strip()) / 60
-
+      total_minutes = get_total_minutes_from_elapsed_time(elapsed_time=elapsed_time)
       total_minutes *= steps_pct # scale total minutes, if partial summary
       minutes_per_step = round(total_minutes / num_steps, 1)
 
@@ -342,8 +402,11 @@ def extract_scf_summary(
     result_summary_dict["energy_delta"] = energy_delta
     result_summary_dict["energy_delta_text"] = energy_delta_str
 
-    #energy_delta = str(energy_delta).rstrip()
-    #energy_delta_kcal_per_mol = str(energy_delta_kcal_per_mol).rstrip()
+    job_cpu_time = extract_job_cpu_time(lines=lines)
+    job_cpu_minutes = get_total_minutes_from_elapsed_time(elapsed_time=job_cpu_time)
+    result_summary_dict["job_cpu_time"] = job_cpu_time
+    result_summary_dict["job_cpu_minutes"] = job_cpu_minutes
+    result_summary_dict["job_completion_datetime"] = extract_job_completion_datetime(lines=lines)
 
   except Exception as ex:
     elapsed_time = str(ex)
