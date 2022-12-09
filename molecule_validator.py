@@ -77,6 +77,9 @@ def validate_bonds_of_one_mol_with_target_molecule(mol: Atoms) -> Dict:
   is_ok = num_missing_in_target + num_missing_in_mol == 0
 
   res = {
+    "name": au.get_name_from_atoms(mol),
+    "description": au.get_description_from_atoms(mol),
+    "source": au.get_source_from_atoms(mol),
     "is_valid": is_ok,
     "units": "angstrom",
     "new": [],
@@ -113,8 +116,6 @@ def validate_bonds_of_many_mols_with_target_molecule(
     progress_bar.set_description(au.get_name_from_atoms(mol))
     validation_result = validate_bonds_of_one_mol_with_target_molecule(mol)
     if not validation_result["is_valid"]:
-      validation_result["name"] = au.get_name_from_atoms(mol)
-      validation_result["description"] = au.get_description_from_atoms(mol)
       invalid_items.append(validation_result)
   
   summary = {
