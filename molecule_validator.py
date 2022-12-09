@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 import numpy as np
 from typing import Any, Dict, List, Tuple, Union
+from tqdm import tqdm
 
 from ase import Atoms
 
@@ -36,64 +37,97 @@ def target_mol_constraints() -> List[FeatureConstraint]:
 
 def get_missing_bonds_info(
                             mol: Atoms,
-                            bonds: List[Tuple[int, int]]
+                            bonds: List[Tuple[int, int]],
+                            target_distances: Dict,
                           ) -> List[str]:
 
-  res = [f"{x}, dist_in_target={round(tm.bonds_distances[x], 3) if x in tm.bonds_distances else 'n/a'}, dist_in_mol={round(mol.get_distance(x[0], x[1]),3)}" for x in bonds]
+  symbols = mol.get_chemical_symbols()
+  res = []
+  for x in bonds:
+    item_info = {
+      "bond": f"{symbols[x[0]]}-{symbols[x[1]]}",
+      "atom_idxs": x,
+      "dist_in_target": round(target_distances[x], 3) if x in target_distances else 'n/a',
+      "dist_in_mol": round(mol.get_distance(x[0], x[1]),3),
+    }
+    res.append(item_info)
 
   return res
 
 
-def validate_with_target_molecule_bonds(mol: Atoms) -> Dict:
+def validate_bonds_of_one_mol_with_target_molecule(mol: Atoms) -> Dict:
+
   target_cc = au.convert_bonds_to_set(tm.CC)
   mol_cc = au.get_bonds_as_set(mol=mol, element1="C", element2="C")
   missing_cc_in_target, missing_cc_in_mol = au.get_bonds_diff(bonds1=target_cc, bonds2=mol_cc)
-  num_missing_cc = len(missing_cc_in_target) + len(missing_cc_in_mol)
 
   target_ch = au.convert_bonds_to_set(tm.CH)
   mol_ch = au.get_bonds_as_set(mol=mol, element1="C", element2="H")
   missing_ch_in_target, missing_ch_in_mol = au.get_bonds_diff(bonds1=target_ch, bonds2=mol_ch)
-  num_missing_ch = len(missing_ch_in_target) + len(missing_ch_in_mol)
 
   target_co = au.convert_bonds_to_set(tm.CO)
   mol_co = au.get_bonds_as_set(mol=mol, element1="C", element2="O")
   missing_co_in_target, missing_co_in_mol = au.get_bonds_diff(bonds1=target_co, bonds2=mol_co)
-  num_missing_co = len(missing_co_in_target) + len(missing_co_in_mol)
 
-  total_missing_in_target = len(missing_cc_in_target) + len(missing_ch_in_target) + len(missing_co_in_target)
-  total_missing_in_mol = len(missing_cc_in_mol) + len(missing_ch_in_mol) + len(missing_co_in_mol)
-  is_ok = total_missing_in_target + total_missing_in_mol == 0
+  missing_in_target = list(missing_cc_in_target) + list(missing_ch_in_target) + list(missing_co_in_target)
+  missing_in_mol = list(missing_cc_in_mol) + list(missing_ch_in_mol) + list(missing_co_in_mol)
 
-  res = { "is_valid": is_ok }
+  num_missing_in_target = len(missing_in_target)
+  num_missing_in_mol = len(missing_in_mol)
+  is_ok = num_missing_in_target + num_missing_in_mol == 0
 
-  if num_missing_cc > 0:
-    res["C-C"] = {}
+  res = {
+    "is_valid": is_ok,
+    "units": "angstrom",
+    "new": [],
+    "lost": [],
+    }
 
-  if num_missing_ch > 0:
-    res["C-H"] = {}
+  if num_missing_in_target > 0:
+    res["new"] = get_missing_bonds_info(
+                                          mol=mol,
+                                          bonds=missing_in_target,
+                                          target_distances=tm.bonds_distances
+                                        )
 
-  if num_missing_co > 0:
-    res["C-O"] = {}
+  if num_missing_in_mol > 0:
+    res["lost"] = get_missing_bonds_info(
+                                          mol=mol,
+                                          bonds=missing_in_mol,
+                                          target_distances=tm.bonds_distances
+                                        )
 
-  if len(missing_cc_in_target) > 0:
-    res["C-C"]["new_cc_bonds"] = get_missing_bonds_info(mol, missing_cc_in_target)
-
-  if len(missing_cc_in_mol) > 0:
-    res["C-C"]["lost_cc_bonds"] = get_missing_bonds_info(mol, missing_cc_in_mol)
-
-  if len(missing_ch_in_target) > 0:
-    res["C-H"]["new_ch_bonds"] = get_missing_bonds_info(mol, missing_ch_in_target)
-
-  if len(missing_ch_in_mol) > 0:
-    res["C-H"]["lost_ch_bonds"] = get_missing_bonds_info(mol, missing_ch_in_mol)
-
-  if len(missing_co_in_target) > 0:
-    res["C-O"]["new_co_bonds"] = get_missing_bonds_info(mol, missing_co_in_target)
-
-  if len(missing_co_in_mol) > 0:
-    res["C-O"]["lost_co_bonds"] = get_missing_bonds_info(mol, missing_co_in_mol)
 
   return res
 
 
+def validate_bonds_of_many_mols_with_target_molecule(
+                  mols_to_validate: List[Atoms],
+                  target_mol: Atoms=None
+                ) -> List[Dict]:
+
+  progress_bar = tqdm(mols_to_validate)
+  invalid_items = []
+  #for experiment_dir in tqdm(experimentr_dirs, desc="Processing gaussian log files"):
+  for mol in progress_bar:
+    progress_bar.set_description(au.get_name_from_atoms(mol))
+    validation_result = validate_bonds_of_one_mol_with_target_molecule(mol)
+    if not validation_result["is_valid"]:
+      validation_result["name"] = au.get_name_from_atoms(mol)
+      validation_result["description"] = au.get_description_from_atoms(mol)
+      invalid_items.append(validation_result)
+  
+  summary = {
+    "num_mols_total": len(mols_to_validate),
+    "num_mols_valid": len(mols_to_validate) - len(invalid_items),
+    "num_mols_invalid": len(invalid_items),
+
+  }
+
+  res = {
+    "summary": summary,
+    "invalid_mols": invalid_items,
+  }
+
+  return res
 
