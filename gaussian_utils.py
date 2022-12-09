@@ -143,7 +143,7 @@ def extract_job_completion_datetime(lines: List[str]) -> str:
       res = lines[line_nr]
 
     res = res.split("at")[1]
-    res = res.replace(".", "")
+    res = res.replace(".", "").strip()
     weekday, month_name, day, time, year = res.split()
     res = f"{day}-{month_name}-{year} {time}"
 
