@@ -120,8 +120,8 @@ def extract_elapsed_time(lines: List[str]) -> str:
                                           search_text="Elapsed time:"
                                           )[0]
 
-    res = lines[line_nr].lstrip().rstrip().replace("time:      ", "time:").replace(" days", "d").replace(" hours", "h").replace(" minutes", "m").replace(" seconds.", "s")
-
+    res = lines[line_nr].strip().replace(" days", "d").replace(" hours", "h").replace(" minutes", "m").replace(" seconds.", "s")
+    res = res.split(":")[1].strip()
   except:
     res = ""
 
@@ -132,13 +132,23 @@ def extract_job_completion_datetime(lines: List[str]) -> str:
   res = ""
 
   try:
+    # completion time usually last line
     res = lines[-1].strip()
-    if res.startswith("Normal termination of Gaussian"):
-      res = res.split("at")[1].replace(".", "")
-      weekday, month_name, day, time, year = res.split()
-      res = f"{day}-{month_name}-{year} {time}"
-  except:
-    res = ""
+    if not "Normal termination of Gaussian" in res:
+      # try error termination
+      line_nr = ut.get_block_start_line_nrs(
+                                            lines=lines,
+                                            search_text="Error termination via"
+                                            )[0]
+      res = lines[line_nr]
+
+    res = res.split("at")[1]
+    res = res.replace(".", "")
+    weekday, month_name, day, time, year = res.split()
+    res = f"{day}-{month_name}-{year} {time}"
+
+  except Exception as ex:
+    res = str(ex)
 
   return res
 
@@ -152,7 +162,8 @@ def extract_job_cpu_time(lines: List[str]) -> str:
                                           search_text="Job cpu time:"
                                           )[0]
 
-    res = lines[line_nr].lstrip().rstrip().replace("time:      ", "time:").replace(" days", "d").replace(" hours", "h").replace(" minutes", "m").replace(" seconds.", "s")
+    res = lines[line_nr].strip().replace(" days", "d").replace(" hours", "h").replace(" minutes", "m").replace(" seconds.", "s")
+    res = res.split(":")[1].strip()
 
   except:
     res = ""
@@ -167,13 +178,14 @@ def get_total_minutes_from_elapsed_time(elapsed_time: str) -> int:
     total_minutes = 0
 
     try:
-      _,_, days, hours, minutes, seconds = elapsed_time.split()
+      days, hours, minutes, seconds = elapsed_time.split()
 
       total_minutes = int(days[:-1].strip()) * 24 * 60 \
                     + int(hours[:-1].strip()) * 60 \
                     + int(minutes[:-1].strip()) \
                     + float(seconds[:-1].strip()) / 60
 
+      total_minutes = round(total_minutes, 1)
     except:
       total_minutes = 0
 
@@ -405,7 +417,7 @@ def extract_scf_summary(
     job_cpu_time = extract_job_cpu_time(lines=lines)
     job_cpu_minutes = get_total_minutes_from_elapsed_time(elapsed_time=job_cpu_time)
     result_summary_dict["job_cpu_time"] = job_cpu_time
-    result_summary_dict["job_cpu_minutes"] = job_cpu_minutes
+    result_summary_dict["job_cpu_hours"] = round(job_cpu_minutes / 60, 2)
     result_summary_dict["job_completion_datetime"] = extract_job_completion_datetime(lines=lines)
 
   except Exception as ex:
