@@ -254,7 +254,8 @@ def extract_gaussian_command_and_dft_functional(lines: List[str]) -> Tuple[str, 
 def extract_scf_summary(
                         file_path: Union[str, Path],
                         collect_to_single_list: bool,
-                        max_step_nr: int=0
+                        max_step_nr: int=0,
+                        ignore_shorter_runs: bool=False
                         ) -> List[str]:
 
   result_summary_dict = {}
@@ -288,7 +289,11 @@ def extract_scf_summary(
   num_steps_original = len(block_lines)
   if len(block_lines) > 1 and max_step_nr > 0:
     block_lines = block_lines[:max_step_nr]
-    
+
+    if ignore_shorter_runs and len(block_lines) < max_step_nr:
+      result_summary_dict["error"] = f"Too few optimization steps, num_steps_required={max_step_nr}, num_steps_available={len(block_lines)}"
+
+
   num_steps = len(block_lines)
   steps_pct = 1 if num_steps_original == num_steps else num_steps / num_steps_original
 
@@ -378,14 +383,16 @@ def extract_scf_summary(
 def extract_and_write_scf_summary_from_gaussian_logfile(
                                     log_file_path: Union[str, Path],
                                     output_path: Union[str, Path, None],
-                                    max_step_nr: int=0
+                                    max_step_nr: int=0,
+                                    ignore_shorter_runs: bool=False
                                     ) -> Dict:
 
   try:
     summary = extract_scf_summary(
                                   file_path=log_file_path,
                                   collect_to_single_list=True,
-                                  max_step_nr=max_step_nr
+                                  max_step_nr=max_step_nr,
+                                  ignore_shorter_runs=ignore_shorter_runs
                                   )
 
     first_part = {
@@ -463,6 +470,7 @@ def process_one_log_file(
                     input_path: Union[str, Path],
                     output_dir: Union[str, Path]=None,
                     extract_summary_step_nr: int=0,
+                    ignore_shorter_runs: bool=False,
                     do_only_summary: bool=False
                     ) -> Dict:
 
@@ -513,7 +521,8 @@ def process_one_log_file(
   task_results["scf_summary"] = extract_and_write_scf_summary_from_gaussian_logfile(
                                     log_file_path=input_path,
                                     output_path=output_path_scf,
-                                    max_step_nr=extract_summary_step_nr
+                                    max_step_nr=extract_summary_step_nr,
+                                    ignore_shorter_runs=ignore_shorter_runs
                                     )
 
   res = {
@@ -530,14 +539,48 @@ def process_many_log_files(
                             output_dir: Union[str, Path]=None,
                             aggregate_log_file_name: str="aggregate.log",
                             extract_summary_step_nr: int=0,
+                            ignore_shorter_runs: bool=False,
                             do_only_summary: bool=False,
                             write_last_opt_steps_file_path: Path=None
                             ) -> Dict:
+
+  '''
+    Processes Gaussian log files.
+    Returns Dictionary of with results.
+
+    extract_summary_step_nr: step nr (or generally [item index + 1] xyz-item)
+      from xyz file containing multiple xyz-data-sections, i.e. more than one geometries.
+      default = 0, i.e. returns last xyz-item from the file.
+      step_nr=1 corresponds to 0 in 0-based idx-s.
+
+    ignore_shorter_runs: if Ture and step_nr > 1 then returns data that corresponds to step_nr.
+     It might be useful if you want to compare trajectories that contain
+     at least step_nr amount of steps.
+
+    do_only_summary: if True then writes aggregate summary file.
+                     if False then writes following information:
+                        - aggregate summary file
+                        - for each item in input_paths: 
+                            - optimization steps as xyz file.
+                            - last optimization step as xyz file.
+                            - last xyz section from Gaussian log. It should be the same geometry as
+                                  the last optimization step xyz file, just in different alignment.
+                            - scf summary
+
+      default = False (i.e. writes a lot of files)
+
+    write_last_opt_steps_file_path: if specified then collects all xyz-items from the last-optimization step
+      into one file, and writes it to the path specified (write_last_opt_steps_file_path).
+      Might be useful for aggregating conformers from various optimization runs into one xyz file.
+      default = None
+
+  '''
 
   res = [process_one_log_file(
             x,
             output_dir,
             extract_summary_step_nr=extract_summary_step_nr,
+            ignore_shorter_runs=ignore_shorter_runs,
             do_only_summary=do_only_summary
           ) for x in input_paths]
 
@@ -552,6 +595,15 @@ def process_many_log_files(
     is_error = "error" in res_item["results"]["scf_summary"] \
         or "energy_end" not in res_item["results"]["scf_summary"]
     if is_error:
+      res_item["aggregate_error"] = {}
+      try:
+        res_item["aggregate_error"]["input_path"] = res_item["input_path"]
+        res_item["aggregate_error"]["error"] = res_item["results"]["scf_summary"]["error"]
+        res_item["aggregate_error"]["scf_summary_file"] = res_item["results"]["scf_summary"]["scf_summary_file"]
+        
+      except:
+        pass
+
       items_with_errors.append(res_item)
     else:
       valid_items.append(res_item)
@@ -559,19 +611,11 @@ def process_many_log_files(
 
   # items_with_errors = [x for x in res if "energy_end" not in x["results"]["scf_summary"]]
   if len(items_with_errors) > 0:
-    items_with_errors_summary_files = []
-    try:
-      items_with_errors_summary_files = [x["results"]["scf_summary"]["scf_summary_file"] for x in items_with_errors],
-    except:
-      pass
-
     errors.append({
       "missing_data_error": "Necessary data is missing from log file. Further details in the specific item's summary file.",
-      "items_with_errors": [x["input_path"] for x in items_with_errors],
-      "scf_summary_files": items_with_errors_summary_files,
+      "items_with_errors": [x["aggregate_error"] for x in items_with_errors],
       })
     res = valid_items
-    #res = [x for x in res if "energy_end" in x["results"]["scf_summary"]]
 
   # try sort ascending by final energy
   diff_best_worst_str = ""
