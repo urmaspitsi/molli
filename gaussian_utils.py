@@ -142,7 +142,7 @@ def extract_job_completion_datetime(lines: List[str]) -> str:
                                             )[0]
       res = lines[line_nr]
 
-    res = res.split("at")[1]
+    res = res.split(" at ")[1]
     res = res.replace(".", "").strip()
     weekday, month_name, day, time, year = res.split()
     res = f"{day}-{month_name}-{year} {time}"
@@ -416,8 +416,10 @@ def extract_scf_summary(
 
     job_cpu_time = extract_job_cpu_time(lines=lines)
     job_cpu_minutes = get_total_minutes_from_elapsed_time(elapsed_time=job_cpu_time)
+
     result_summary_dict["job_cpu_time"] = job_cpu_time
-    result_summary_dict["job_cpu_hours"] = round(job_cpu_minutes / 60, 2)
+    result_summary_dict["job_cpu_hours"] = round(job_cpu_minutes / 60, 1)
+    result_summary_dict["job_cpu_hours_per_step"] = round(job_cpu_minutes / num_steps / 60, 2)
     result_summary_dict["job_completion_datetime"] = extract_job_completion_datetime(lines=lines)
 
   except Exception as ex:
