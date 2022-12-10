@@ -265,10 +265,13 @@ GU.process_many_log_files(
 input_path = Path("C:/tmp/gaussian/pre_screening/crest_BP86_STO3G_10steps/crest_bp86_sto3g_10steps_confs.xyz")
 #input_path = aggregate_xyz_file
 
-near_similars = au.calculate_rmsd_xyz_file(
+metric_func = ms.rmsd_of_positions
+
+near_similars = au.calculate_metric_xyz_file(
                             xyz_path=input_path,
                             max_value=0.3,
-                            align=False
+                            align=False,
+                            metric_function=metric_func
                           )
 
 near_similars
