@@ -109,45 +109,11 @@ def calculate_metric_many_to_many(
             ) for t in targets]
 
 
-def calculate_rmsd(
-                    target: Atoms,
-                    mol: Atoms,
-                    align: bool
-                  ) -> float:
-
-  aligned_mol = align_2_molecules_min_rmsd(
-                                            target=target,
-                                            atoms_to_align=mol
-                                          ) if align else mol
-
-  return ms.rmsd_of_positions(
-                            mol1=target,
-                            mol2=aligned_mol
-                          )
-
-
-def calculate_rmsd_one_to_many(
-                                target: Atoms,
-                                mols: List[Atoms],
-                                align: bool
-                              ) -> List[float]:
-
-  return [calculate_rmsd(target=target, mol=m, align=align) for m in mols]
-
-
-def calculate_rmsd_many_to_many(
-                                  targets: List[Atoms],
-                                  mols: List[Atoms],
-                                  align: bool
-                                ) -> List[List[float]]:
-
-  return [calculate_rmsd_one_to_many(target=t, mols=mols, align=align) for t in targets]
-
-
-def calculate_rmsd_xyz_files(
+def calculate_metric_xyz_files(
                               target_mols_path: Path,
                               mols_path: Path,
-                              align: bool
+                              align: bool,
+                              metric_function: Callable,
                             ) -> List[List[float]]:
 
   target_mols = create_ase_atoms_list_from_xyz_file(
@@ -160,65 +126,72 @@ def calculate_rmsd_xyz_files(
                                               name=mols_path.stem
                                             )
 
-  return calculate_rmsd_many_to_many(
+  return calculate_metric_many_to_many(
                                     targets=target_mols,
                                     mols=mols,
-                                    align=align
+                                    align=align,
+                                    metric_function=metric_function
                                   )
 
 
-def calculate_rmsd_between_xyz_files(
+def calculate_metric_between_xyz_files(
                                       target_xyz_path: Path,
                                       xyz_path: Path,
                                       max_value: float,
-                                      align: bool
+                                      align: bool,
+                                      metric_function: Callable,
                                     ) -> Dict:
 
-  rmsd_values = calculate_rmsd_xyz_files(
+  values = calculate_metric_xyz_files(
                       target_mols_path=target_xyz_path,
                       mols_path=xyz_path,
-                      align=align
+                      align=align,
+                      metric_function=metric_function
                     )
 
   less_than_max_value = []
   is_same_file = True if target_xyz_path == xyz_path else False
-  for i, vals_i in enumerate(rmsd_values):
+  for i, vals_i in enumerate(values):
     j_start = i + 1 if is_same_file else 0
     for j in range(j_start, len(vals_i)):
-      rmsd_val = rmsd_values[i][j]
+      rmsd_val = values[i][j]
       if rmsd_val < max_value:
-        less_than_max_value.append(("target_source_rmsd", i, j, rmsd_val))
+        less_than_max_value.append(("target_source_value", i, j, rmsd_val))
 
   less_than_max_value = sorted(less_than_max_value, key=lambda x: x[3])
 
   res = {
-    "all_rmsd_values": rmsd_values,
     "less_than_max_value": less_than_max_value,
+    "all_values": values,
   }
 
   return res
 
 
-def calculate_rmsd_xyz_file(
+def calculate_metric_xyz_file(
                               xyz_path: Path,
                               max_value: float,
-                              align: bool
+                              align: bool,
+                              metric_function: Callable
                             ) -> Dict:
 
-  filtered_rmsd_vals = calculate_rmsd_between_xyz_files(
+  res = calculate_metric_between_xyz_files(
       target_xyz_path=xyz_path,
       xyz_path=xyz_path,
       max_value=max_value,
-      align=align
-    )["less_than_max_value"]
+      align=align,
+      metric_function=metric_function
+    )
 
   keys = set()
-  res = []
-  for name,i,j,rmsd_val in filtered_rmsd_vals:
-    if not ((i,j) in keys or (j,i)) in keys:
-      res.append((name,i,j,rmsd_val))
-      keys.add((i,j))
- 
+  less_than_max_value = []
+  for name,i,j,val in res["less_than_max_value"]:
+    if not ((i, j) in keys or (j, i)) in keys:
+      less_than_max_value.append((name, i, j, val))
+      keys.add((i, j))
+
+  res["less_than_max_value"] = less_than_max_value
+
   return res
 
 
