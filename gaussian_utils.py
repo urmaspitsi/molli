@@ -634,7 +634,8 @@ def process_many_log_files(
                             ignore_shorter_runs: bool=False,
                             do_only_summary: bool=False,
                             return_converged_only: bool=False,
-                            write_last_opt_steps_file_path: Path=None
+                            write_last_opt_steps_file_path: Path=None,
+                            show_errors_in_output: bool=True
                             ) -> Dict:
 
   '''
@@ -666,6 +667,9 @@ def process_many_log_files(
       into one file, and writes it to the path specified (write_last_opt_steps_file_path).
       Might be useful for aggregating conformers from various optimization runs into one xyz file.
       default = None
+
+    show_errors_in_output: whether occurred errors are returned in the final output.
+      default = True
 
   '''
 
@@ -739,10 +743,17 @@ def process_many_log_files(
 
   if write_last_opt_steps_file_path:
     try:
-      last_opt_steps_xyz = [extract_optimization_steps_as_xyz(
-                                                    file_path=x,
-                                                    collect_to_single_list=False
-                                                    )[-1] for x in valid_paths]
+      if extract_summary_step_nr > 0:
+        # TODO explicit step_nr or last if ignore_shorter_runs=False
+        last_opt_steps_xyz = [extract_optimization_steps_as_xyz(
+                                                      file_path=x,
+                                                      collect_to_single_list=False
+                                                      )[extract_summary_step_nr - 1] for x in valid_paths]
+      else:
+        last_opt_steps_xyz = [extract_optimization_steps_as_xyz(
+                                                      file_path=x,
+                                                      collect_to_single_list=False
+                                                      )[-1] for x in valid_paths]
 
       dicts = [xyz_parser.convert_xyz_lines_to_dict(x, convert_coords_to_float=True) for x in last_opt_steps_xyz]
 
@@ -765,7 +776,7 @@ def process_many_log_files(
     except Exception as ex:
       errors.append(str(ex))
 
-  if len(errors) > 0:
+  if len(errors) > 0 and show_errors_in_output:
     summary["error"] = errors
 
   result_dict = {
