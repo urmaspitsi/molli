@@ -336,8 +336,11 @@ def extract_scf_summary(
                         file_path: Union[str, Path],
                         collect_to_single_list: bool,
                         max_step_nr: int=0,
-                        ignore_shorter_runs: bool=False
+                        ignore_shorter_runs: bool=False,
+                        return_converged_only: bool=False
                         ) -> List[str]:
+
+  skip = False # if error is found then skip subsequent code block
 
   result_summary_dict = {}
   lines = ut.read_text_file_as_lines(file_path=file_path)
@@ -366,6 +369,10 @@ def extract_scf_summary(
 
   result_summary_dict["optimization_converged"] = is_converged
 
+  if return_converged_only and not is_converged:
+      result_summary_dict["error"] = "Optimization not converged"
+      skip = True
+
   # Collect summary at the max_step_nr
   num_steps_original = len(block_lines)
   if len(block_lines) > 1 and max_step_nr > 0:
@@ -373,6 +380,7 @@ def extract_scf_summary(
 
     if ignore_shorter_runs and len(block_lines) < max_step_nr:
       result_summary_dict["error"] = f"Too few optimization steps, num_steps_required={max_step_nr}, num_steps_available={len(block_lines)}"
+      skip = True
 
   num_steps = len(block_lines)
   steps_pct = 1 if num_steps_original == num_steps else num_steps / num_steps_original
@@ -380,76 +388,79 @@ def extract_scf_summary(
   text_lines = []
   separator_row = "-" * 90
   energy_delta = 9999 # some arbitrary large number, if error
-  try:
-    energy_start = float(lines[block_lines[0]].split("  ")[2])
-    energy_end = float(lines[block_lines[-1]].split("  ")[2])
-    energy_delta = energy_end - energy_start
-    energy_delta_str = f"{round(energy_delta, 8)} a.u., {round(energy_delta * C.hartree_in_kcal_per_mol, 2)} kcal/mol, {round(energy_delta * C.hartree_in_kJ_per_mol, 2)} kJ/mol"
 
-  except Exception as ex:
-    energy_delta_str = str(ex)
+  if not skip:
 
-  try:
-    minutes_per_step = 0
-    total_minutes = 0
-    elapsed_time = extract_elapsed_time(lines=lines)
-    if elapsed_time == None or len(elapsed_time) < 1:
-      elapsed_time = "Elapsed time info not found"
-      result_summary_dict["error"] = "Did not find the phrase: 'Elapsed time:' in the input file."
-    else:
-      total_minutes = get_total_minutes_from_elapsed_time(elapsed_time=elapsed_time)
-      total_minutes *= steps_pct # scale total minutes, if partial summary
-      minutes_per_step = round(total_minutes / num_steps, 1)
+    try:
+      energy_start = float(lines[block_lines[0]].split("  ")[2])
+      energy_end = float(lines[block_lines[-1]].split("  ")[2])
+      energy_delta = energy_end - energy_start
+      energy_delta_str = f"{round(energy_delta, 8)} a.u., {round(energy_delta * C.hartree_in_kcal_per_mol, 2)} kcal/mol, {round(energy_delta * C.hartree_in_kJ_per_mol, 2)} kJ/mol"
 
-    elapsed_time_str = elapsed_time \
-                        if steps_pct == 1 \
-                        else f"{elapsed_time} (time for {num_steps_original} steps)"
+    except Exception as ex:
+      energy_delta_str = str(ex)
 
-    result_summary_dict["elapsed_time_str"] = elapsed_time_str
-    result_summary_dict["elapsed_time_minutes"] = round(total_minutes, 1)
-    result_summary_dict["num_steps"] = num_steps
-    result_summary_dict["minutes_per_step"] = minutes_per_step
-    result_summary_dict["energy_start"] = energy_start
-    result_summary_dict["energy_end"] = energy_end
-    result_summary_dict["energy_delta"] = energy_delta
-    result_summary_dict["energy_delta_text"] = energy_delta_str
+    try:
+      minutes_per_step = 0
+      total_minutes = 0
+      elapsed_time = extract_elapsed_time(lines=lines)
+      if elapsed_time == None or len(elapsed_time) < 1:
+        elapsed_time = "Elapsed time info not found"
+        result_summary_dict["error"] = "Did not find the phrase: 'Elapsed time:' in the input file."
+      else:
+        total_minutes = get_total_minutes_from_elapsed_time(elapsed_time=elapsed_time)
+        total_minutes *= steps_pct # scale total minutes, if partial summary
+        minutes_per_step = round(total_minutes / num_steps, 1)
 
-    job_cpu_time = extract_job_cpu_time(lines=lines)
-    job_cpu_minutes = get_total_minutes_from_elapsed_time(elapsed_time=job_cpu_time)
+      elapsed_time_str = elapsed_time \
+                          if steps_pct == 1 \
+                          else f"{elapsed_time} (time for {num_steps_original} steps)"
 
-    result_summary_dict["job_cpu_time"] = job_cpu_time
-    result_summary_dict["job_cpu_hours"] = round(job_cpu_minutes / 60, 1)
-    result_summary_dict["job_cpu_hours_per_step"] = round(job_cpu_minutes / num_steps / 60, 2)
-    result_summary_dict["job_completion_datetime"] = extract_job_completion_datetime(lines=lines)
+      result_summary_dict["elapsed_time_str"] = elapsed_time_str
+      result_summary_dict["elapsed_time_minutes"] = round(total_minutes, 1)
+      result_summary_dict["num_steps"] = num_steps
+      result_summary_dict["minutes_per_step"] = minutes_per_step
+      result_summary_dict["energy_start"] = energy_start
+      result_summary_dict["energy_end"] = energy_end
+      result_summary_dict["energy_delta"] = energy_delta
+      result_summary_dict["energy_delta_text"] = energy_delta_str
 
-  except Exception as ex:
-    elapsed_time = str(ex)
-    result_summary_dict["error"] = str(ex)
+      job_cpu_time = extract_job_cpu_time(lines=lines)
+      job_cpu_minutes = get_total_minutes_from_elapsed_time(elapsed_time=job_cpu_time)
 
-  scf_data = [separator_row, f"SCF: change in energy = {energy_delta_str}  {elapsed_time_str}  {minutes_per_step} min/step", separator_row] \
-    + [f"{i + 1}:" + " " * (4 - len(str(i + 1))) + lines[x].replace("\n", "") for i,x in enumerate(block_lines)] \
-    + ["\n"]
+      result_summary_dict["job_cpu_time"] = job_cpu_time
+      result_summary_dict["job_cpu_hours"] = round(job_cpu_minutes / 60, 1)
+      result_summary_dict["job_cpu_hours_per_step"] = round(job_cpu_minutes / num_steps / 60, 2)
+      result_summary_dict["job_completion_datetime"] = extract_job_completion_datetime(lines=lines)
 
-  text_lines.extend(scf_data) if collect_to_single_list else text_lines.append(scf_data)
+    except Exception as ex:
+      elapsed_time = str(ex)
+      result_summary_dict["error"] = str(ex)
 
-  for i in range(num_steps):
-    start_line = block_lines[i]
-    for j in range(100):
-      start_line -= 1
-      if "------------------------" in lines[start_line] or start_line < 0:
-        start_line += 1
-        break
+    scf_data = [separator_row, f"SCF: change in energy = {energy_delta_str}  {elapsed_time_str}  {minutes_per_step} min/step", separator_row] \
+      + [f"{i + 1}:" + " " * (4 - len(str(i + 1))) + lines[x].replace("\n", "") for i,x in enumerate(block_lines)] \
+      + ["\n"]
 
-    end_line = block_lines[i] + 3
-    description = f"opt step {i + 1} of {num_steps}"
-    summary = [separator_row, description, separator_row] + lines[start_line:end_line] + ["\n"]
-    summary = [x.replace("\n", "") for x in summary]
-    text_lines.extend(summary) if collect_to_single_list else text_lines.append(summary)
+    text_lines.extend(scf_data) if collect_to_single_list else text_lines.append(scf_data)
 
-  # final message: wall time etc
-  final_block = [separator_row, "END", separator_row] + lines[-13:]
-  final_block = [x.replace("\n", "") for x in final_block]
-  text_lines.extend(final_block) if collect_to_single_list else text_lines.append(final_block)
+    for i in range(num_steps):
+      start_line = block_lines[i]
+      for j in range(100):
+        start_line -= 1
+        if "------------------------" in lines[start_line] or start_line < 0:
+          start_line += 1
+          break
+
+      end_line = block_lines[i] + 3
+      description = f"opt step {i + 1} of {num_steps}"
+      summary = [separator_row, description, separator_row] + lines[start_line:end_line] + ["\n"]
+      summary = [x.replace("\n", "") for x in summary]
+      text_lines.extend(summary) if collect_to_single_list else text_lines.append(summary)
+
+    # final message: wall time etc
+    final_block = [separator_row, "END", separator_row] + lines[-13:]
+    final_block = [x.replace("\n", "") for x in final_block]
+    text_lines.extend(final_block) if collect_to_single_list else text_lines.append(final_block)
 
   res = {}
   res["summary"] = result_summary_dict
@@ -461,7 +472,8 @@ def extract_and_write_scf_summary_from_gaussian_logfile(
                                     log_file_path: Union[str, Path],
                                     output_path: Union[str, Path, None],
                                     max_step_nr: int=0,
-                                    ignore_shorter_runs: bool=False
+                                    ignore_shorter_runs: bool=False,
+                                    return_converged_only: bool=False
                                     ) -> Dict:
 
   try:
@@ -469,7 +481,8 @@ def extract_and_write_scf_summary_from_gaussian_logfile(
                                   file_path=log_file_path,
                                   collect_to_single_list=True,
                                   max_step_nr=max_step_nr,
-                                  ignore_shorter_runs=ignore_shorter_runs
+                                  ignore_shorter_runs=ignore_shorter_runs,
+                                  return_converged_only=return_converged_only
                                   )
 
     first_part = {
@@ -548,7 +561,8 @@ def process_one_log_file(
                     output_dir: Union[str, Path]=None,
                     extract_summary_step_nr: int=0,
                     ignore_shorter_runs: bool=False,
-                    do_only_summary: bool=False
+                    do_only_summary: bool=False,
+                    return_converged_only: bool=False
                     ) -> Dict:
 
   out_dir = Path(input_path).parent \
@@ -599,7 +613,8 @@ def process_one_log_file(
                                     log_file_path=input_path,
                                     output_path=output_path_scf,
                                     max_step_nr=extract_summary_step_nr,
-                                    ignore_shorter_runs=ignore_shorter_runs
+                                    ignore_shorter_runs=ignore_shorter_runs,
+                                    return_converged_only=return_converged_only
                                     )
 
   res = {
@@ -618,6 +633,7 @@ def process_many_log_files(
                             extract_summary_step_nr: int=0,
                             ignore_shorter_runs: bool=False,
                             do_only_summary: bool=False,
+                            return_converged_only: bool=False,
                             write_last_opt_steps_file_path: Path=None
                             ) -> Dict:
 
@@ -658,7 +674,8 @@ def process_many_log_files(
             output_dir,
             extract_summary_step_nr=extract_summary_step_nr,
             ignore_shorter_runs=ignore_shorter_runs,
-            do_only_summary=do_only_summary
+            do_only_summary=do_only_summary,
+            return_converged_only=return_converged_only
           ) for x in input_paths]
 
   summary = {}
