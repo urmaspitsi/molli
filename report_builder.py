@@ -128,7 +128,6 @@ def prepare_dataframe(
                         else min(df["energy_end"])
 
   res = df.copy()
-  #res = df.sort_values("energy_end") #.reset_index()
   res["energy_diff_to_best_au"] = res["energy_end"] - best_final_energy
   res["energy_diff_to_best_kj_mol"] = res["energy_diff_to_best_au"] * C.hartree_in_kJ_per_mol
   res["energy_diff_to_best_kcal_mol"] = res["energy_diff_to_best_au"] * C.hartree_in_kcal_per_mol
@@ -138,7 +137,7 @@ def prepare_dataframe(
   if drop_duplicates:
     res.drop_duplicates("label", keep="first", inplace=True)
 
-  res.sort_values("energy_end", inplace=True) #.reset_index()
+  res.sort_values("energy_end", inplace=True)
   res.reset_index(inplace=True)
 
   return res
