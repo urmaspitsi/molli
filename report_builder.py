@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
 import ase_utils as au
+import constants as C
 import utils as ut
 
 
@@ -90,3 +91,35 @@ def read_aggregate_summary_to_dataframe(
 
 
 
+
+def convert_file_name_to_display_name(file_name: str) -> str:
+    res = file_name.lower().replace("mol24_tpsstpss_gd3", "original")
+    res = res.replace("mol24_b3p86", "original")
+    res = res.replace("mol24_wb97xd", "original")
+    res = res.replace("mol24_", "")
+    res = res.replace("crest_ex", "ex")
+    res = res.replace("crest_", "c")
+    res = res.replace("gfn2_", "").replace("gfnff_", "")
+    res = res.replace("bp86_", "").replace("pbe1pbe_", "").replace("tpsstpss_", "")
+    res = res.replace("b3p86_", "").replace("wb97xd_", "")
+    res = res.replace("def2svpp_svpfit_", "").replace("sto3g_", "").replace("cc_pvtz_tzvpfit_", "")
+    res = res.replace("_def2svpp_svpfit", "").replace("_sto3g", "").replace("_cc_pvtz_tzvpfit", "")
+    res = res.replace("crest", "c")
+    return res
+
+
+def prepare_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+  res = df.sort_values("energy_end").reset_index()
+
+  best_final_energy = min(res["energy_end"])
+  res["energy_diff_to_best_au"] = res["energy_end"] - best_final_energy
+  res["energy_diff_to_best_kj_mol"] = res["energy_diff_to_best_au"] * C.hartree_in_kJ_per_mol
+  res["energy_diff_to_best_kcal_mol"] = res["energy_diff_to_best_au"] * C.hartree_in_kcal_per_mol
+  res["source"] = res["input_path"].apply(lambda x: Path(x).name)
+  res["label"] = res["input_path"].apply(lambda x: convert_file_name_to_display_name(Path(x).stem))
+
+
+  res.drop_duplicates("label", keep="first", inplace=True)
+  res.reset_index(inplace=True)
+
+  return res
