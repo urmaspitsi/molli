@@ -90,8 +90,6 @@ def read_aggregate_summary_to_dataframe(
   return pd.DataFrame(read_aggregate_summary_to_dict(input_path=input_path))
 
 
-
-
 def convert_file_name_to_display_name(file_name: str) -> str:
     res = file_name.lower().replace("mol24_tpsstpss_gd3", "original")
     res = res.replace("mol24_b3p86", "original")
@@ -108,7 +106,11 @@ def convert_file_name_to_display_name(file_name: str) -> str:
     return res
 
 
-def prepare_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+def prepare_dataframe(
+                      df: pd.DataFrame,
+                      drop_duplicates: bool=True
+                    ) -> pd.DataFrame:
+
   res = df.sort_values("energy_end").reset_index()
 
   best_final_energy = min(res["energy_end"])
@@ -118,8 +120,9 @@ def prepare_dataframe(df: pd.DataFrame) -> pd.DataFrame:
   res["source"] = res["input_path"].apply(lambda x: Path(x).name)
   res["label"] = res["input_path"].apply(lambda x: convert_file_name_to_display_name(Path(x).stem))
 
+  if drop_duplicates:
+    res.drop_duplicates("label", keep="first", inplace=True)
 
-  res.drop_duplicates("label", keep="first", inplace=True)
   res.reset_index(inplace=True)
 
   return res
