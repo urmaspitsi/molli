@@ -29,7 +29,7 @@ def read_aggregate_summary_to_dict(
 
   columns_from_results = [
     "final_xyz",
-    "opt_steps"
+    "opt_steps",
     ]
 
   columns_from_scf_summary = [
@@ -46,6 +46,11 @@ def read_aggregate_summary_to_dict(
     "energy_end",
     "energy_delta",
     "energy_delta_text",
+    "job_cpu_time",
+    "job_cpu_hours",
+    "job_cpu_hours_per_step",
+    "job_completion_datetime",
+    "energy_diff_to_best",
     ]
 
   columns = columns_from_scf_summary + columns_from_experiment + columns_from_results
