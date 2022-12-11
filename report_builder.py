@@ -100,7 +100,7 @@ def convert_file_name_to_display_name(file_name: str) -> str:
     res = res.replace("crest_ex", "ex")
     res = res.replace("crest_", "c")
     res = res.replace("gfn2_", "").replace("gfnff_", "")
-    res = res.replace("bp86_", "").replace("pbe1pbe_", "").replace("tpsstpss_", "")
+    res = res.replace("bp86_", "").replace("pbe1pbe_", "").replace("tpsstpss_gd3_", "")
     res = res.replace("b3p86_", "").replace("wb97xd_", "")
     res = res.replace("def2svpp_svpfit_", "").replace("sto3g_", "").replace("cc_pvtz_tzvpfit_", "")
     res = res.replace("_def2svpp_svpfit", "").replace("_sto3g", "").replace("_cc_pvtz_tzvpfit", "")
