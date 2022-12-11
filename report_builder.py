@@ -13,6 +13,17 @@ import constants as C
 import utils as ut
 
 
+def find_row_idx_in_dataframe(
+                              df: pd.DataFrame,
+                              column: str,
+                              value: Any
+                            ) -> int:
+  try:
+    return df[column].loc[lambda x: x==value].index[0]
+  except:
+    return -1
+
+
 def read_aggregate_summary_to_dict(
           input_path: Union[str, Path]
         ) -> Dict:
@@ -108,12 +119,16 @@ def convert_file_name_to_display_name(file_name: str) -> str:
 
 def prepare_dataframe(
                       df: pd.DataFrame,
-                      drop_duplicates: bool=True
+                      drop_duplicates: bool=True,
+                      best_item_idx: int= -1,
                     ) -> pd.DataFrame:
 
-  res = df.sort_values("energy_end").reset_index()
+  best_final_energy = df["energy_end"][best_item_idx] \
+                        if best_item_idx >= 0 and best_item_idx < len(df) \
+                        else min(df["energy_end"])
 
-  best_final_energy = min(res["energy_end"])
+  res = df.copy()
+  #res = df.sort_values("energy_end") #.reset_index()
   res["energy_diff_to_best_au"] = res["energy_end"] - best_final_energy
   res["energy_diff_to_best_kj_mol"] = res["energy_diff_to_best_au"] * C.hartree_in_kJ_per_mol
   res["energy_diff_to_best_kcal_mol"] = res["energy_diff_to_best_au"] * C.hartree_in_kcal_per_mol
@@ -123,6 +138,7 @@ def prepare_dataframe(
   if drop_duplicates:
     res.drop_duplicates("label", keep="first", inplace=True)
 
+  res.sort_values("energy_end", inplace=True) #.reset_index()
   res.reset_index(inplace=True)
 
   return res
