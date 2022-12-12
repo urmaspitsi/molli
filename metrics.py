@@ -33,6 +33,15 @@ def mad_of_distances(mol1: Atoms, mol2: Atoms) -> float:
   return np.mean(np.abs(d1 - d2))
 
 
+def max_distance(mol1: Atoms, mol2: Atoms) -> float:
+  '''
+    Maximum distance between corresponding atoms.
+    e.g. Gaussian 16 default threshold in geometry optimization
+    Maximum Displacement = 0.0018 A
+  '''
+  return np.max(np.linalg.norm(mol1.positions - mol2.positions, axis=1))
+
+
 def mean_abs_coord_diff(mol1: Atoms, mol2: Atoms) -> float:
   '''
     Mean Absolute Difference between position coordinates.
@@ -53,6 +62,8 @@ def rmsd_of_positions(mol1: Atoms, mol2: Atoms) -> float:
   '''
     Root Mean Squared Distance:
     Square root of the Average of Squared Distances between position coordinates.
+    e.g. Gaussian 16 default threshold in geometry optimization
+    RMS Displacement = 0.0012 A
   '''
   return np.sqrt(np.mean(np.linalg.norm(mol1.positions - mol2.positions, axis=1)**2))
   #return np.sqrt(np.mean((mol1.positions - mol2.positions)**2))
