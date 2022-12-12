@@ -109,6 +109,52 @@ def calculate_metric_many_to_many(
             ) for t in targets]
 
 
+def calculate_metric_cross(
+                            mols: List[Atoms],
+                            align: bool,
+                            metric_function: Callable,
+                          ) -> Dict:
+  '''
+    Applies metric_function on every item in mols with every other item in mols:
+      metric_function(mol1=mols[i], mol2=mols[j]) -> float
+      i,j = 0 to len(mols)
+    metric_function must:
+      take 2 input parameters: mol1: Atoms, mol2: Atoms
+      and return float.
+    
+    align: True/False, whether to align target and mol before metric calculation.
+    alignment is done by align_2_molecules_min_rmsd()
+
+    returns Dictionary {
+      names: List[str],
+      values: Dict[Tuple[int,int], float]
+    }
+       
+  '''
+  res = {
+    "info": [
+              {
+                "name": get_name_from_atoms(mol=mol),
+                "description": get_description_from_atoms(mol=mol),
+                "source": get_source_from_atoms(mol=mol),
+              } for mol in mols
+            ],
+
+    "values": {},
+  }
+
+  for i, mol1 in enumerate(mols[:-1]):
+    for j in range(i + 1, len(mols)):
+      res["values"][(i ,j)] = calculate_metric_between_two_molecules(
+        target=mol1,
+        mol=mols[j],
+        align=align,
+        metric_function=metric_function
+      )
+
+  return res
+
+
 def calculate_metric_xyz_files(
                               target_mols_path: Path,
                               mols_path: Path,
