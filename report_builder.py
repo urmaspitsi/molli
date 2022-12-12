@@ -141,3 +141,71 @@ def prepare_dataframe(
   res.reset_index(inplace=True)
 
   return res
+
+
+
+def find_common_items(
+                      list1: List[Any],
+                      list2: List[Any]
+                    ) -> List[Any]:
+
+  return list(set(list1).intersection(list2))
+
+
+def prepare_dataframes_by_dft(
+                                df: pd.DataFrame,
+                                dft_names: List[str]
+                              ) -> Dict:
+
+  res = {
+      "common_labels": {},
+    }
+  key_col = "label"
+  
+  labels = []
+  for dft in dft_names:
+    mask = df["dft_functional"] == dft
+    res[dft] = prepare_dataframe(df=df[mask])
+    labels.append(res[dft][key_col])
+
+  for i, dft1 in enumerate(dft_names[:-1]):
+    for j in range(i + 1, len(dft_names)):
+      dft2 = dft_names[j]
+      common_labels = find_common_items(
+                        list1=list(res[dft1][key_col]),
+                        list2=list(res[dft2][key_col])
+                        )
+      res["common_labels"][(dft1, dft2)] = common_labels
+      res["common_labels"][(dft2, dft1)] = common_labels
+          
+  return res
+
+
+def find_common_items_in_dataframes(
+                                    column: str,
+                                    df_list: List[pd.DataFrame]
+                                  ) -> List[Any]:
+
+  '''
+    Return the list of common items among all dataframes in df_list.
+    Search in the column specified.
+    Return unique common items from the column spcified.
+  '''
+
+  res = list(set(list(df_list[0][column])))
+  for df in df_list[1:]:
+    res = find_common_items(
+        list1=res,
+        list2=list(df[column])
+  )
+
+  return res
+
+
+
+
+
+
+
+
+
