@@ -115,6 +115,9 @@ def calculate_metric_cross(
                             metric_function: Callable,
                           ) -> Dict:
   '''
+    Same as calculate_metric_matrix but returns sparse dictionary instead of
+    full distance matrix with duplicated entries.
+
     Applies metric_function on every item in mols with every other item in mols:
       metric_function(mol1=mols[i], mol2=mols[j]) -> float
       i,j = 0 to len(mols)
@@ -153,6 +156,36 @@ def calculate_metric_cross(
       )
 
   return res
+
+
+def calculate_metric_matrix(
+                            mols: List[Atoms],
+                            align: bool,
+                            metric_function: Callable,
+                          ) -> List[List[float]]:
+  '''
+    Applies metric_function on every item in mols with every other item in mols:
+      metric_function(mol1=mols[i], mol2=mols[j]) -> float
+      i,j = 0 to len(mols)
+
+    metric_function must:
+      take 2 input parameters: mol1: Atoms, mol2: Atoms
+      and return float.
+    
+    align: True/False, whether to align target and mol before metric calculation.
+    alignment is done by align_2_molecules_min_rmsd()
+
+    returns distance matrix as List[List[float]]
+    }
+       
+  '''
+
+  return calculate_metric_many_to_many(
+            targets=mols,
+            mols=mols,
+            align=align,
+            metric_function=metric_function
+          )
 
 
 def calculate_metric_xyz_files(
