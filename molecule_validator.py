@@ -8,7 +8,7 @@ from ase import Atoms
 import ase_utils as au
 import features as ft
 from features_constraints import Constraint, FeatureConstraint, MoleculeFeatureConstraints
-from target_molecule import TargetMoleculeBonds as tm
+from target_molecule import TargetMolecule as tm
 
 
 def validate_structure(

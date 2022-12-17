@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Tuple, Union
 
 
 @dataclass
-class TargetMoleculeBonds():
+class TargetMolecule():
   '''
     created with ase.
     source: source: https://wiki.fysik.dtu.dk/ase/ase/geometry.html
