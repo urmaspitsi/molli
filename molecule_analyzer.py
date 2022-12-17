@@ -1,6 +1,7 @@
 import numpy as np
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
+import pandas as pd
 
 from ase import Atoms
 
@@ -80,9 +81,24 @@ def analyze_by_features(
   return res
 
 
-# def create_features():
+def analyze_by_features_to_dataframe(
+                        molecules: List[Atoms],
+                        features_list: List[ft.Feature]
+                        ) -> pd.DataFrame:
 
-#   return 0
+  analysis_res = analyze_by_features(
+                    molecules=molecules,
+                    features_list=features_list
+                  )
+
+  res = pd.DataFrame()
+  res["mol_names"] = analysis_res["info"]["mol_names"]
+
+  columns = list(analysis_res["results"].keys())
+  for col in columns:
+    res[col] = [x["value"] for x in analysis_res["results"][col]]
+
+  return res
 
 
 def calculate_values_groupby_features(
