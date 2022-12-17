@@ -108,3 +108,40 @@ class AverageDistance(Feature):
 
   def get_units(self) -> str:
     return "Angstroms"
+
+
+def create_angle(
+    atom_idxs: Tuple[int],
+    mol: Atoms=None) -> Angle:
+
+  idx1, idx2, idx3 = atom_idxs
+  res = Angle(
+              label=f"{idx1 + 1}-{idx2 + 1}-{idx3 + 1}",
+              atom_idx1=idx1,
+              atom_idx2=idx2,
+              atom_idx3=idx3
+            )
+  if mol != None:
+    res.label = res.get_info(atoms_obj=mol)
+
+  return res
+
+
+def create_dihedral(
+    atom_idxs: Tuple[int],
+    mol: Atoms=None) -> Dihedral:
+
+  idx1, idx2, idx3, idx4 = atom_idxs
+  res = Dihedral(
+              label=f"{idx1 + 1}-{idx2 + 1}-{idx3 + 1}-{idx4 + 1}",
+              atom_idx1=idx1,
+              atom_idx2=idx2,
+              atom_idx3=idx3
+            )
+  if mol != None:
+    res.label = res.get_info(atoms_obj=mol)
+
+  return res
+
+
+
