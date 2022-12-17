@@ -51,6 +51,35 @@ from series_item import SeriesItem
 #
 #
 
+def analyze_by_features(
+                        molecules: List[Atoms],
+                        features_list: List[ft.Feature]
+                        ) -> Dict:
+
+  res = {
+    "info": {
+      "num_molecules": len(molecules),
+      "num_features": len(features_list),
+      "mol_names": [au.get_name_from_atoms(mol=mol) for mol in molecules],
+      "features_labels": [ft.label for ft in features_list],
+
+    },
+    "results": {}
+  }
+ 
+  for ft in features_list:
+    res["results"][ft.label] = [
+        {
+          "name": au.get_name_from_atoms(mol=mol),
+          "description": au.get_description_from_atoms(mol=mol),
+          "source": au.get_source_from_atoms(mol=mol),
+          "value": ft.calculate_value(atoms_obj=mol),
+        } for mol in molecules
+      ]
+
+  return res
+
+
 def calculate_values_groupby_features(
                                       molecules: List[Atoms],
                                       features_list: List[ft.Feature]
@@ -58,7 +87,7 @@ def calculate_values_groupby_features(
 
   res = []
  
-  labels = [mol.info["name"] for mol in molecules]
+  labels = [au.get_name_from_atoms(mol=mol) for mol in molecules]
 
   for ft in features_list:
     features_values = [ft.calculate_value(mol) for mol in molecules]
