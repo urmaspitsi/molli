@@ -127,6 +127,13 @@ def create_angle(
   return res
 
 
+def create_angles(
+    atom_idxs: List[Tuple[int]],
+    mol: Atoms=None) -> List[Angle]:
+
+  return [create_angle(atom_idxs=x, mol=mol) for x in atom_idxs]
+
+
 def create_dihedral(
     atom_idxs: Tuple[int],
     mol: Atoms=None) -> Dihedral:
@@ -144,4 +151,9 @@ def create_dihedral(
   return res
 
 
+def create_dihedrals(
+    atom_idxs: List[Tuple[int]],
+    mol: Atoms=None) -> List[Dihedral]:
+
+  return [create_dihedral(atom_idxs=x, mol=mol) for x in atom_idxs]
 
