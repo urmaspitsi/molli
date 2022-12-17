@@ -71,7 +71,7 @@ class Dihedral(Feature):
     n2 = f"{symbols[self.atom_idx2]}({self.atom_idx2 + 1})"
     n3 = f"{symbols[self.atom_idx3]}({self.atom_idx3 + 1})"
     n4 = f"{symbols[self.atom_idx4]}({self.atom_idx4 + 1})"
-    return f"Torsion angle {n1}-{n2}-{n3}-{n4}"
+    return f"Dihedral {n1}-{n2}-{n3}-{n4}"
 
   def get_units(self) -> str:
     return "Degrees"
