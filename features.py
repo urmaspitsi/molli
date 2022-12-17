@@ -143,7 +143,8 @@ def create_dihedral(
               label=f"{idx1 + 1}-{idx2 + 1}-{idx3 + 1}-{idx4 + 1}",
               atom_idx1=idx1,
               atom_idx2=idx2,
-              atom_idx3=idx3
+              atom_idx3=idx3,
+              atom_idx4=idx4
             )
   if mol != None:
     res.label = res.get_info(atoms_obj=mol)
