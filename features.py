@@ -31,7 +31,7 @@ class Distance(Feature):
     symbols = atoms_obj.get_chemical_symbols()
     n1 = f"{symbols[self.atom_idx1]}({self.atom_idx1 + 1})"
     n2 = f"{symbols[self.atom_idx2]}({self.atom_idx2 + 1})"
-    return f"Distance between atoms {n1}-{n2}"
+    return f"Distance {n1}-{n2}"
 
   def get_units(self) -> str:
     return "Angstroms"
@@ -50,7 +50,7 @@ class Angle(Feature):
     n1 = f"{symbols[self.atom_idx1]}({self.atom_idx1 + 1})"
     n2 = f"{symbols[self.atom_idx2]}({self.atom_idx2 + 1})"
     n3 = f"{symbols[self.atom_idx3]}({self.atom_idx3 + 1})"
-    return f"Bending angle between atoms {n1}-{n2}-{n3}"
+    return f"Angle {n1}-{n2}-{n3}"
 
   def get_units(self) -> str:
     return "Degrees"
@@ -71,7 +71,7 @@ class Dihedral(Feature):
     n2 = f"{symbols[self.atom_idx2]}({self.atom_idx2 + 1})"
     n3 = f"{symbols[self.atom_idx3]}({self.atom_idx3 + 1})"
     n4 = f"{symbols[self.atom_idx4]}({self.atom_idx4 + 1})"
-    return f"Torsion angle between atoms {n1}-{n2}-{n3}-{n4}"
+    return f"Torsion angle {n1}-{n2}-{n3}-{n4}"
 
   def get_units(self) -> str:
     return "Degrees"
