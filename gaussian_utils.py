@@ -282,6 +282,24 @@ def extract_optimization_steps_as_xyz(
   return res
 
 
+def extract_chemical_formula(lines: List[str]) -> str:
+  res = ""
+
+  try:
+    res = lines[ut.get_block_start_line_nrs(
+                                            lines=lines,
+                                            search_text="Framework group"
+                                            )[0]].strip()
+
+    res = res.split("(")[1]
+    res = res.split(")")[0].strip()
+
+  except:
+    res = ""
+
+  return res
+
+
 def extract_gaussian_version(lines: List[str]) -> str:
   res = ""
 
@@ -352,6 +370,7 @@ def extract_scf_summary(
   result_summary_dict["dft_functional"] = dft_functional
 
   result_summary_dict["dft_info"] = extract_dft_info(lines=lines)
+  result_summary_dict["chemical_formula"] = extract_chemical_formula(lines=lines)
 
   block_lines = ut.get_block_start_line_nrs(
                                             lines=lines,
