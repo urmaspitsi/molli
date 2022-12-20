@@ -24,6 +24,26 @@ def find_row_idx_in_dataframe(
     return -1
 
 
+def find_value_in_dataframe(
+                              df: pd.DataFrame,
+                              col_to_search: str,
+                              search_value: Any,
+                              col_to_return: str
+                            ) -> Any:
+
+  idx = find_row_idx_in_dataframe(
+          df=df,
+          column=col_to_search,
+          value=search_value
+          )
+
+  if idx < 0:
+    return None
+  else:
+    return df[col_to_return][idx]
+    #return list(df[col_to_return])[idx]
+
+
 def read_aggregate_summary_to_dict(
           input_path: Union[str, Path]
         ) -> Dict:
@@ -125,7 +145,7 @@ def prepare_dataframe(
 
   best_final_energy = df["energy_end"][best_item_idx] \
                         if best_item_idx >= 0 and best_item_idx < len(df) \
-                        else min(df["energy_end"])
+                        else df["energy_end"].min()
 
   res = df.copy()
   res["energy_diff_to_best_au"] = res["energy_end"] - best_final_energy
@@ -141,7 +161,6 @@ def prepare_dataframe(
   res.reset_index(inplace=True)
 
   return res
-
 
 
 def find_common_items(
