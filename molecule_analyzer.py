@@ -26,8 +26,6 @@ from series_item import SeriesItem
 #   output: pandas, csv, dict/json
 #   visualize: graph, charts, histograms
 
-
-
 # Tasks:
 # 1. optimization steps: input 1 xyz file, contains many xyz-blocks (geometries)
 #   Q: questions to ask? timeseries of a bond length(s), angle(s).
