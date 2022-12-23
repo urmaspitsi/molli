@@ -2,41 +2,17 @@
 #%%
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
-from tqdm import tqdm
 
-import ase_utils as au
 import gaussian_utils as GU
-import metrics as ms
 import utils as ut
 
-#%%
-############################################################################
-# Extract final xyz from Gaussian log file
-############################################################################
-
-gaussian_log_file = Path("C:/tmp/gaussian/jobs_energy/original_BP86_Def2SVPP_SVPFit_energy_48cpu/job.log")
-output_path = "C:/tmp/gaussian/processed_logs/jobs_logs/aaa_xyz_test.txt"
-xyz_lines = GU.extract_final_xyz(file_path=gaussian_log_file)["results"]
-
-ut.write_text_file_from_lines(
-                              file_path=output_path,
-                              lines=xyz_lines
-                            )
 
 #%%
 ############################################################################
 # Create Gaussian job files: convert from .xyz trajectory (opt steps) file.
 ############################################################################
 
-#xyz_file = Path("C:/tmp/gaussian/crest_ex15_BP86_STO3G/ex15_gfnff_crest_conformers.xyz")
-#xyz_file = Path("C:/tmp/gaussian/crest_ex15_BP86_STO3G/ex16_gfn2_crest_conformers.xyz")
-
-#xyz_file = Path("C:/tmp/gaussian/input/ex16_gfn2_crest_conformers.xyz")
-#xyz_file = Path("C:/tmp/gaussian/input/ex15_gfnff_crest_conformers.xyz")
-#xyz_file = Path("C:/tmp/gaussian/input/ex19_gfn2_crestconfs_from_ex16_crest5.xyz")
-#xyz_file = Path("C:/tmp/gaussian/input/ex23_gfn2_crestconfs_from_ex16_crest3.xyz")
 xyz_file = Path("C:/tmp/gaussian/input/ex0ff_crestconfs.xyz")
-#xyz_file = Path("C:/tmp/gaussian/input/ex0b_gfn2_crestconfs.xyz")
 
 gaussian_jobs_output_dir = Path("C:/tmp/gaussian/test_jobs") #
 
@@ -87,16 +63,16 @@ gaussian_job_files = GU.create_gaussian_job_files_from_xyz_steps(
 # pbe1pbe_sto3g
 
 log_files_dirs = [
-    Path("C:/tmp/gaussian/optimize/crest_s2_pbe1pbe_def2svpp_svpfit/gaussian_results"),
+    Path("C:/tmp/gaussian/optimize/crest_s4_bp86_sto3g/gaussian_results"),
   ]
 
 gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
 
-output_dir = Path("C:/tmp/gaussian/optimize/crest_s2_pbe1pbe_def2svpp_svpfit/molli_results")
+output_dir = Path("C:/tmp/gaussian/optimize/crest_s4_bp86_sto3g/molli_results")
 
-aggregate_log_file_name = "crest_s2_pbe1pbe_def2svpp_svpfit_log.txt"
+aggregate_log_file_name = "crest_s4_bp86_sto3g_log.txt"
 
-aggregate_xyz_file = output_dir.joinpath("crest_s2_pbe1pbe_def2svpp_svpfit_confs.xyz")
+aggregate_xyz_file = output_dir.joinpath("crest_s4_bp86_sto3g_confs.xyz")
 
 GU.process_many_log_files(
                           input_paths=gaussian_log_files,
@@ -104,202 +80,9 @@ GU.process_many_log_files(
                           aggregate_log_file_name=aggregate_log_file_name,
 #                          extract_summary_step_nr=10,
 #                          ignore_shorter_runs=False,
-#                          do_only_summary=True,
-                          write_last_opt_steps_file_path=aggregate_xyz_file
-                          )
-
-#%%
-############################################################################
-# Process Gaussian log files: pbe1pbe_cc_pvtz_tzvpfit: final dft calculation results
-############################################################################
-
-log_files_dirs = [
-    Path("C:/tmp/gaussian/optimize/pbe1pbe_cc_pvtz_tzvpfit/gaussian_results"),
-  ]
-
-dft_name = "pbe1pbe_cc_pvtz_tzvpfit"
-
-gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
-output_dir = Path("C:/tmp/gaussian/optimize/pbe1pbe_cc_pvtz_tzvpfit/molli_results")
-aggregate_log_file_name = f"{dft_name}_log.txt"
-aggregate_xyz_file = output_dir.joinpath(f"{dft_name}_confs.xyz")
-
-GU.process_many_log_files(
-                          input_paths=gaussian_log_files,
-                          output_dir=output_dir,
-                          aggregate_log_file_name=aggregate_log_file_name,
-#                          extract_summary_step_nr=10,
-#                          do_only_summary=True,
-                          write_last_opt_steps_file_path=aggregate_xyz_file
-                          )
-
-#%%
-############################################################################
-# Process Gaussian log files: BP86/STO-3G 10 steps
-############################################################################
-
-log_files_dirs = [
-    Path("C:/tmp/gaussian/optimize/crest_ex0a_BP86_STO3G_results"),
-    Path("C:/tmp/gaussian/optimize/crest_ex0b_BP86_STO3G_results"),
-    Path("C:/tmp/gaussian/optimize/crest_ex15_BP86_STO3G_results"), 
-    Path("C:/tmp/gaussian/optimize/crest_ex19_BP86_STO3G_results"),
-    Path("C:/tmp/gaussian/optimize/crest_ex21_BP86_STO3G_results"),
-    Path("C:/tmp/gaussian/optimize/crest_ex23_BP86_STO3G_results"),
-  ]
-
-num_steps = 25
-dft_name = "bp86_sto3g"
-
-gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
-output_dir = Path(f"C:/tmp/gaussian/pre_screening/crest_{dft_name}_{num_steps}steps")
-aggregate_log_file_name = f"crest_{dft_name}_{num_steps}steps_log.txt"
-aggregate_xyz_file = output_dir.joinpath(f"crest_{dft_name}_{num_steps}steps_confs.xyz")
-
-GU.process_many_log_files(
-                          input_paths=gaussian_log_files,
-                          output_dir=output_dir,
-                          aggregate_log_file_name=aggregate_log_file_name,
-                          extract_summary_step_nr=num_steps,
                           do_only_summary=True,
                           write_last_opt_steps_file_path=aggregate_xyz_file
                           )
 
 #%%
-############################################################################
-# Process Gaussian log files: BP86/Def2SVPP/SVPFit 10 steps
-############################################################################
 
-log_files_dirs = [
-    Path("C:/tmp/gaussian/optimize/crest_ex0a_BP86_Def2SVPP_SVPFit_results"),
-    Path("C:/tmp/gaussian/optimize/crest_ex0b_BP86_Def2SVPP_SVPFit_results"),
-    Path("C:/tmp/gaussian/optimize/crest_ex15_BP86_Def2SVPP_SVPFit_results"),
-    Path("C:/tmp/gaussian/optimize/crest_ex0ff_BP86_Def2SVPP_SVPFit_results"),
-    Path("C:/tmp/gaussian/optimize/crest_ex23_BP86_Def2SVPP_SVPFit_results"),
-  ]
-
-num_steps = 10
-dft_name = "bp86_def2svpp_svpfit"
-
-gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
-output_dir = Path(f"C:/tmp/gaussian/pre_screening/crest_{dft_name}_{num_steps}steps")
-aggregate_log_file_name = f"crest_{dft_name}_{num_steps}steps_log.txt"
-aggregate_xyz_file = output_dir.joinpath(f"crest_{dft_name}_{num_steps}steps_confs.xyz")
-
-GU.process_many_log_files(
-                          input_paths=gaussian_log_files,
-                          output_dir=output_dir,
-                          aggregate_log_file_name=aggregate_log_file_name,
-                          extract_summary_step_nr=num_steps,
-                          do_only_summary=True,
-                          write_last_opt_steps_file_path=aggregate_xyz_file
-                          )
-
-#%%
-############################################################################
-# Process Gaussian log files: PBE1PBE/Def2SVPP/SVPFit 10 steps
-############################################################################
-
-log_files_dirs = [
-    Path("C:/tmp/gaussian/optimize/crest_ex0a_PBE1PBE_Def2SVPP_SVPFit_results"),
-    Path("C:/tmp/gaussian/optimize/crest_ex16_crest3_PBE1PBE_Def2SVPP_SVPFit_results"),
-    Path("C:/tmp/gaussian/optimize/crest_ex16_crest5_PBE1PBE_Def2SVPP_SVPFit_results"),
-    Path("C:/tmp/gaussian/optimize/crest_ex19_crest23_PBE1PBE_Def2SVPP_SVPFit_results"),
-    Path("C:/tmp/gaussian/optimize/crest_ex19_s1_PBE1PBE_Def2SVPP_SVPFit_results"),
-  ]
-
-num_steps = 10
-dft_name = "pbe1pbe_def2svpp_svpfit"
-
-gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
-output_dir = Path(f"C:/tmp/gaussian/pre_screening/crest_{dft_name}_{num_steps}steps")
-aggregate_log_file_name = f"crest_{dft_name}_{num_steps}steps_log.txt"
-aggregate_xyz_file = output_dir.joinpath(f"crest_{dft_name}_{num_steps}steps_confs.xyz")
-
-GU.process_many_log_files(
-                          input_paths=gaussian_log_files,
-                          output_dir=output_dir,
-                          aggregate_log_file_name=aggregate_log_file_name,
-                          extract_summary_step_nr=num_steps,
-                          do_only_summary=True,
-                          write_last_opt_steps_file_path=aggregate_xyz_file
-                          )
-
-#%%
-############################################################################
-# Process Gaussian log files: collect aligned geometries into single file
-############################################################################
-
-exp_name = "ex19_crest23"
-#dft_name = "bp86_sto3g"
-#dft_name = "bp86_def2svpp_svpfit"
-dft_name = "pbe1pbe_def2svpp_svpfit"
-name = f"{exp_name}_{dft_name}"
-num_steps = 100
-
-log_files_dirs = [
-    Path(f"C:/tmp/gaussian/optimize/crest_{name}_results"),
-  ]
-
-gaussian_log_files = ut.get_file_paths_in_many_dirs(log_files_dirs, ".log")
-output_dir = Path(f"C:/tmp/gaussian/optimize/crest_{name}_logs")
-aggregate_log_file_name = f"{name}_{num_steps}steps_log.txt"
-
-#aggregate_xyz_file = output_dir.joinpath(f"{name}_{num_steps}steps_confs.xyz")
-
-GU.process_many_log_files(
-                          input_paths=gaussian_log_files,
-                          output_dir=output_dir,
-                          aggregate_log_file_name=aggregate_log_file_name,
-                          extract_summary_step_nr=num_steps,
-#                          do_only_summary=True,
-#                          write_last_opt_steps_file_path=aggregate_xyz_file
-                          )
-
-
-#%%
-############################################################################
-# Find near similars
-############################################################################
-
-#input_path = Path("C:/tmp/gaussian/pre_screening/crest_BP86_STO3G_25steps/crest_bp86_sto3g_25steps_confs.xyz")
-input_path = Path("C:/tmp/gaussian/pre_screening/crest_BP86_STO3G_10steps/crest_bp86_sto3g_10steps_confs.xyz")
-#input_path = aggregate_xyz_file
-
-metric_func = ms.rmsd_of_positions
-
-near_similars = au.calculate_metric_xyz_file(
-                            xyz_path=input_path,
-                            max_value=0.3,
-                            align=False,
-                            metric_function=metric_func
-                          )
-
-near_similars
-
-# %%
-mols = au.create_ase_atoms_list_from_xyz_file(input_path=input_path, name="crest_bp86_sto3g_10steps_confs")
-
-# %%
-
-m1 = mols[217]
-m2 = mols[246]
-
-near_similars_mad = au.calculate_metric_between_two_molecules(
-                        target=m1,
-                        mol=m2,
-                        align=False,
-                        metric_function=ms.mad_of_positions
-                      )
-
-near_similars_mad
-
-# %%
-
-au.write_ase_atoms_to_xyz_file()
-
-
-# %%
-
-# %%
-
-# %%
