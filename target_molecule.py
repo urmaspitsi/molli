@@ -261,3 +261,20 @@ class TargetMolecule():
       (6, 59, 60),
     ]
 
+
+  # Forbidden bonds  Ti-O
+  # 1-based indexing
+  #   FT.Distance(label="distance Ti(7)-O(2)", atom_idx1=7-1, atom_idx2=2-1),
+  #   FT.Distance(label="distance Ti(7)-O(12)", atom_idx1=7-1, atom_idx2=12-1),
+  #   FT.Distance(label="distance Ti(61)-O(45)", atom_idx1=61-1, atom_idx2=45-1),
+  #   FT.Distance(label="distance Ti(61)-O(65)", atom_idx1=61-1, atom_idx2=65-1),
+
+  forbidden_bonds_TiO =[
+      (6, 1),
+      (6, 11),
+      (60, 44),
+      (60, 64),
+    ]
+
+
+
