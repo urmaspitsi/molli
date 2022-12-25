@@ -9,7 +9,17 @@ from typing import Any, Dict, List, Tuple, Union
 # Generic functions
 ################################################################
 
+
 def copy_files(
+                files_to_copy: List[Path],
+                target_folder: Union[str, Path],
+              ) -> None:
+
+  for f in files_to_copy:
+    shutil.copyfile(f, Path(target_folder).joinpath(f.name))
+
+
+def copy_files2(
                 source_folder: Union[str, Path],
                 target_folder: Union[str, Path],
                 file_extension: str
@@ -20,8 +30,10 @@ def copy_files(
                                         file_extension=file_extension
                                         )
 
-  for f in files_to_copy:
-    shutil.copyfile(f, Path(target_folder).joinpath(f.name))
+  copy_files(
+      files_to_copy=files_to_copy,
+      target_folder=target_folder
+    )
 
 
 def convert_list_of_tuples_to_tuple_of_lists(list_of_tuples: List[Tuple]) -> Tuple[List]:
