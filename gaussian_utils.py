@@ -761,6 +761,18 @@ def process_many_log_files(
   summary["ranking"] = rank_list
 
   if write_last_opt_steps_file_path:
+    valid_paths_sorted = {}
+    try:
+      valid_paths_sorted = {
+        dct["input_path"]: dct["results"]["scf_summary"]["energy_end"] for dct in res
+      }
+
+    except:
+      valid_paths_sorted = {}
+
+    if len(valid_paths_sorted) > 0:
+      valid_paths = [Path(k) for k, _ in valid_paths_sorted.items()]
+
     try:
       if extract_summary_step_nr > 0:
         last_opt_steps_all_runs = [extract_optimization_steps_as_xyz(
