@@ -771,16 +771,12 @@ def process_many_log_files(
         # shorter runs should be already filtered out above and reflected in valid_paths
         # take last run or specified run if available
         last_opt_steps_xyz = [
-                              x[- 1] \
+                              x[-1] \
                                 if len(x) < extract_summary_step_nr \
                                 else x[extract_summary_step_nr - 1]
                               for x in last_opt_steps_all_runs
                             ]
 
-        # last_opt_steps_xyz = [extract_optimization_steps_as_xyz(
-        #                                               file_path=x,
-        #                                               collect_to_single_list=False
-        #                                               )[extract_summary_step_nr - 1] for x in valid_paths]
       else:
         last_opt_steps_xyz = [extract_optimization_steps_as_xyz(
                                                       file_path=x,
