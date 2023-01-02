@@ -255,6 +255,24 @@ def extract_final_xyz(
   return res
 
 
+def extract_energy(lines: List[str]) -> str:
+  res = ""
+
+  try:
+    res = lines[ut.get_block_start_line_nrs(
+                                            lines=lines,
+                                            search_text="SCF Done:"
+                                            )[0]]
+
+    res = res.split("=")[1].strip()
+    res = res.split()[0].strip()
+
+  except:
+    res = ""
+
+  return res
+
+
 def extract_optimization_steps_as_xyz(
                                       file_path: Union[str, Path],
                                       collect_to_single_list: bool
@@ -271,7 +289,12 @@ def extract_optimization_steps_as_xyz(
   for i in range(num_steps):
     start_line = xyz_block_lines[i]
     end_line = xyz_block_lines[i + 1] if i < num_steps - 1 else len(lines)
-    description = f"opt step {i + 1} of {num_steps}, source: {file_path.name}"
+    energy = extract_energy(lines=lines[start_line:end_line])
+    if len(energy) < 1 and i > 0:
+      # try previous: if converged then last two xyz blocks are identical and SCF Done is not shown for the last.
+      energy = extract_energy(lines=lines[xyz_block_lines[i - 1]:start_line])
+
+    description = f"{energy}, opt step {i + 1} of {num_steps}, source: {file_path.name}"
     xyz = extract_opt_step_as_xyz_lines(
                                         lines=lines,
                                         between_lines=(start_line, end_line),
