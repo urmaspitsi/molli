@@ -822,6 +822,11 @@ def process_many_log_files(
 
       mols = [au.create_ase_atoms_from_xyz_data(xyz_data=xyz_data) for xyz_data in dicts]
 
+      aggregate_xyz_res = au.write_ase_atoms_to_xyz_file(
+                atoms_list=mols,
+                output_path=write_last_opt_steps_file_path
+              )
+
       aligned_mols = [
           au.align_2_molecules_min_rmsd(
                                       target=mols[0],
@@ -829,9 +834,14 @@ def process_many_log_files(
                                     ) for x in mols
         ]
 
+      out_file_stem = write_last_opt_steps_file_path.stem
+      out_file_suffix = write_last_opt_steps_file_path.suffix
+      aligned_file_name = f"{out_file_stem}_aligned{out_file_suffix}"
+      aligned_mols_path = write_last_opt_steps_file_path.parent.joinpath(aligned_file_name)
+
       aggregate_xyz_res = au.write_ase_atoms_to_xyz_file(
                 atoms_list=aligned_mols,
-                output_path=write_last_opt_steps_file_path
+                output_path=aligned_mols_path
               )
 
       summary["last_opt_steps_file"] = aggregate_xyz_res
