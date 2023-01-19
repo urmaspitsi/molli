@@ -12,3 +12,4 @@
 ### See examples folder:
 * How to extract information from [Gaussian software](https://gaussian.com/opt/) log files.
 * How to analyze features, extracted from xyz files.
+* etc.
